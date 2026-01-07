@@ -20,12 +20,7 @@ export function Login() {
             ? await supabase.auth.signInWithPassword({ email, password })
             : await supabase.auth.signUp({
                 email,
-                password,
-                options: {
-                    data: {
-                        role: 'admin' // The first user can be admin, or we can make this more complex later
-                    }
-                }
+                password
             });
 
         if (error) {

@@ -17,21 +17,50 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [isAdmin, setIsAdmin] = useState(false);
 
     useEffect(() => {
+        const fetchProfile = async (userId: string) => {
+            try {
+                const { data } = await supabase
+                    .from('profiles')
+                    .select('is_admin')
+                    .eq('id', userId)
+                    .single();
+
+                setIsAdmin(data?.is_admin || false);
+            } catch (error) {
+                console.error('Error fetching profile:', error);
+                setIsAdmin(false);
+            } finally {
+                setLoading(false);
+            }
+        };
+
         // Check active sessions and sets the user
         supabase.auth.getSession().then(({ data: { session } }) => {
-            setUser(session?.user ?? null);
-            setIsAdmin(session?.user?.user_metadata?.role === 'admin');
-            setLoading(false);
+            const currentUser = session?.user ?? null;
+            setUser(currentUser);
+            if (currentUser) {
+                fetchProfile(currentUser.id);
+            } else {
+                setIsAdmin(false);
+                setLoading(false);
+            }
         });
 
         // Listen for changes on auth state (logged in, signed out, etc.)
         const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-            setUser(session?.user ?? null);
-            setIsAdmin(session?.user?.user_metadata?.role === 'admin');
-            setLoading(false);
+            const currentUser = session?.user ?? null;
+            setUser(currentUser);
+            if (currentUser) {
+                fetchProfile(currentUser.id);
+            } else {
+                setIsAdmin(false);
+                setLoading(false);
+            }
         });
 
-        return () => subscription.unsubscribe();
+        return () => {
+            subscription.unsubscribe();
+        };
     }, []);
 
     const signOut = async () => {
