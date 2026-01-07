@@ -1,0 +1,85 @@
+Domestik App Prompt
+"Create a web application called Domestik, focused on managing services for self-employed domestic professionals. The application should allow for strict control of work days, clients, and income.
+
+1. Identity and Interface:
+
+The app's name is Domestik.
+
+'Mobile-First' design with a clean interface, large buttons for easy interaction, and colors that convey professionalism (suggestion: Deep Blue and White).
+
+2. Data Structure and Fields:
+
+Client Management: An area to register the name/identification of different clients.
+
+Service Record (Entries):
+
+Date: Calendar selector.
+
+Client: Dropdown menu to select the previously registered client.
+
+Time Worked: Numeric field (e.g., 4 or 4.5 hours).
+
+Hourly Rate: Monetary field (defined by default or manually entered).
+
+Total for the Day: Automatic calculation of (Time * Rate).
+
+3. Functionalities of the Administrator:
+
+Summary Dashboard: Show the total billed in the current month, total hours worked, and the number of services performed.
+
+Service History: A list organized by date with all records, allowing you to edit or delete entries.
+
+Filters: Ability to filter the history by Client or by date range.
+
+4. User Experience (UX):
+
+Upon opening the app, the user should see a prominent 'Register New Day' button.
+
+Immediate visual feedback when a service is successfully saved.
+
+
+
+
+1. Color Palette (Modern Pastel)
+
+The idea is to use colors that evoke freshness and confidence.
+
+Primary Color (Action): Pastel Mint Green (#B2D8D8) – Conveys freshness and "job done". Use for confirmation buttons.
+
+Secondary Color (Highlight): Soft Sky Blue (#A7C7E7) – Conveys confidence and professionalism. Use for icons and headers.
+
+Supporting Color (Financial): Peach or Apricot (#F8C8DC) – Use to highlight earned values ​​(Total for the Day/Month), creating a soft contrast.
+
+Background: Off-White (#F9F9F9) – To keep the interface light and avoid eye strain.
+
+2. Visual Element Style
+For a modern and clean look:
+
+Rounded Corners (Border Radius): Use generous rounding (approximately 12px to 16px) on all buttons and cards. This gives a friendly and modern appearance.
+
+Soft Shadows: Avoid solid black lines. Use very light and diffused shadows to add depth to the service cards, making them appear to "float" on the background.
+
+Typography: * Titles: A modern and geometric Sans-Serif font (e.g., Poppins or Montserrat).
+
+Body Text: Something very legible (e.g., Inter or Roboto).
+
+3. Interface Layout (Screen by Screen)
+A. Dashboard (Main Screen)
+Summary Cards: At the top, two or three colored cards (in different pastel shades) showing: "Monthly Earnings", "Total Hours", and "Next Service".
+
+Floating Button (FAB): A large circular button in the bottom right corner with a + icon for "Add New Day". This should be the most vibrant color element in the palette.
+
+B. Registration Form
+"Clean" Inputs: Input fields with white backgrounds and very thin light gray borders.
+
+Visual Selectors: Instead of just writing the client's name, use small colored "chips" or labels to quickly identify each client by color.
+
+C. History List
+Grouping by Month: Divide the list with subtle titles (e.g., "January 2024").
+
+Card Design: Each job entry should be a white card. On the left side, a thin vertical bar with the color assigned to the client; on the right side, the total value highlighted.
+
+4. Suggested Micro-Interactions
+Success Feedback: When saving a service, show a small mint green "check" animation.
+
+Empty States: If there are no registered services, show a minimalist illustration in pastel tones with a motivational phrase such as "Ready to start the day?"
