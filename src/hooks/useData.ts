@@ -18,9 +18,15 @@ export function useClients() {
     };
 
     const addClient = async (name: string, color: string) => {
+        const { data: { user } } = await supabase.auth.getUser();
+        
         const { data, error } = await supabase
             .from('clients')
-            .insert([{ name, color }])
+            .insert([{ 
+                name, 
+                color,
+                user_id: user?.id 
+            }])
             .select();
 
         if (data) setClients([...clients, data[0]].sort((a, b) => a.name.localeCompare(b.name)));
@@ -56,9 +62,14 @@ export function useServices() {
     };
 
     const addService = async (service: Omit<Service, 'id' | 'created_at'>) => {
+        const { data: { user } } = await supabase.auth.getUser();
+
         const { data, error } = await supabase
             .from('services')
-            .insert([service])
+            .insert([{ 
+                ...service,
+                user_id: user?.id
+            }])
             .select('*, client:clients(*)');
 
         if (data) setServices([data[0] as Service, ...services]);

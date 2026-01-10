@@ -3,6 +3,7 @@ CREATE TABLE clients (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   name TEXT NOT NULL,
   color TEXT NOT NULL,
+  user_id UUID REFERENCES auth.users(id) DEFAULT auth.uid(),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
@@ -11,6 +12,7 @@ CREATE TABLE services (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   date DATE NOT NULL,
   client_id UUID REFERENCES clients(id) ON DELETE CASCADE,
+  user_id UUID REFERENCES auth.users(id) DEFAULT auth.uid(),
   time_worked NUMERIC NOT NULL,
   hourly_rate NUMERIC NOT NULL,
   total NUMERIC NOT NULL,
@@ -28,12 +30,9 @@ CREATE TABLE IF NOT EXISTS profiles (
 CREATE OR REPLACE FUNCTION handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
-  -- The first user to register becomes the admin
+  -- Always make the user an admin
   INSERT INTO public.profiles (id, is_admin)
-  VALUES (
-    new.id,
-    NOT EXISTS (SELECT 1 FROM public.profiles)
-  );
+  VALUES (new.id, TRUE);
   RETURN new;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = '';
@@ -60,39 +59,19 @@ USING (auth.uid() = id);
 -- CLIENTS POLICIES
 DROP POLICY IF EXISTS "Allow all access" ON public.clients;
 DROP POLICY IF EXISTS "Allow authenticated select on clients" ON public.clients;
-CREATE POLICY "Allow authenticated select on clients" 
-ON public.clients FOR SELECT 
-TO authenticated 
-USING (true);
-
 DROP POLICY IF EXISTS "Allow admin all on clients" ON public.clients;
-CREATE POLICY "Allow admin all on clients" 
+
+CREATE POLICY "Users can only access their own clients" 
 ON public.clients FOR ALL 
 TO authenticated 
-USING (
-  EXISTS (
-    SELECT 1 FROM public.profiles 
-    WHERE profiles.id = auth.uid() 
-    AND profiles.is_admin = TRUE
-  )
-);
+USING (auth.uid() = user_id);
 
 -- SERVICES POLICIES
 DROP POLICY IF EXISTS "Allow all access" ON public.services;
 DROP POLICY IF EXISTS "Allow authenticated select on services" ON public.services;
-CREATE POLICY "Allow authenticated select on services" 
-ON public.services FOR SELECT 
-TO authenticated 
-USING (true);
-
 DROP POLICY IF EXISTS "Allow admin all on services" ON public.services;
-CREATE POLICY "Allow admin all on services" 
+
+CREATE POLICY "Users can only access their own services" 
 ON public.services FOR ALL 
 TO authenticated 
-USING (
-  EXISTS (
-    SELECT 1 FROM public.profiles 
-    WHERE profiles.id = auth.uid() 
-    AND profiles.is_admin = TRUE
-  )
-);
+USING (auth.uid() = user_id);
