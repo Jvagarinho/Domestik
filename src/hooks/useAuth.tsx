@@ -20,7 +20,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const fetchProfile = async (userId: string) => {
             try {
                 const { data } = await supabase
-                    .from('profiles')
+                    .from('domestik_profiles')
                     .select('is_admin')
                     .eq('id', userId)
                     .single();

@@ -9,7 +9,7 @@ export function useClients() {
     const fetchClients = async () => {
         setLoading(true);
         const { data } = await supabase
-            .from('clients')
+            .from('domestik_clients')
             .select('*')
             .order('name');
 
@@ -19,13 +19,13 @@ export function useClients() {
 
     const addClient = async (name: string, color: string) => {
         const { data: { user } } = await supabase.auth.getUser();
-        
+
         const { data, error } = await supabase
-            .from('clients')
-            .insert([{ 
-                name, 
+            .from('domestik_clients')
+            .insert([{
+                name,
                 color,
-                user_id: user?.id 
+                user_id: user?.id
             }])
             .select();
 
@@ -47,8 +47,8 @@ export function useServices() {
     const fetchServices = async (clientId?: string, startDate?: string, endDate?: string) => {
         setLoading(true);
         let query = supabase
-            .from('services')
-            .select('*, client:clients(*)')
+            .from('domestik_services')
+            .select('*, client:domestik_clients(*)')
             .order('date', { ascending: false });
 
         if (clientId) query = query.eq('client_id', clientId);
@@ -65,12 +65,12 @@ export function useServices() {
         const { data: { user } } = await supabase.auth.getUser();
 
         const { data, error } = await supabase
-            .from('services')
-            .insert([{ 
+            .from('domestik_services')
+            .insert([{
                 ...service,
                 user_id: user?.id
             }])
-            .select('*, client:clients(*)');
+            .select('*, client:domestik_clients(*)');
 
         if (data) setServices([data[0] as Service, ...services]);
         return { data, error };
