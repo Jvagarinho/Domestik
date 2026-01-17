@@ -10,15 +10,19 @@ import { AuthProvider, useAuth } from './hooks/useAuth';
 import { Login } from './components/Login';
 import { MonthSelector } from './components/MonthSelector';
 import { startOfMonth, endOfMonth, format } from 'date-fns';
+import type { Service, Client } from './types';
 
 function AppContent() {
-  const { clients, addClient } = useClients();
-  const { services, addService, fetchServices } = useServices();
+  const { clients, addClient, updateClient, archiveClient } = useClients();
+  const { services, addService, updateService, fetchServices } = useServices();
   const { user, isAdmin, signOut, loading } = useAuth();
   const [selectedDate, setSelectedDate] = useState(new Date());
 
   const [isServiceModalOpen, setIsServiceModalOpen] = useState(false);
   const [isClientModalOpen, setIsClientModalOpen] = useState(false);
+  const [editingClient, setEditingClient] = useState<Client | undefined>(undefined);
+  const [activePage, setActivePage] = useState<'dashboard' | 'clients'>('dashboard');
+  const [editingService, setEditingService] = useState<Service | undefined>(undefined);
 
   useEffect(() => {
     if (user) {
@@ -27,6 +31,31 @@ function AppContent() {
       fetchServices(undefined, start, end);
     }
   }, [user, selectedDate]);
+
+  const handleEditService = (service: Service) => {
+    setEditingService(service);
+    setIsServiceModalOpen(true);
+  };
+
+  const handleCloseServiceModal = () => {
+    setIsServiceModalOpen(false);
+    setEditingService(undefined);
+  };
+
+  const handleOpenNewClient = () => {
+    setEditingClient(undefined);
+    setIsClientModalOpen(true);
+  };
+
+  const handleEditClient = (client: Client) => {
+    setEditingClient(client);
+    setIsClientModalOpen(true);
+  };
+
+  const handleArchiveClient = async (client: Client) => {
+    if (!confirm(`Archive ${client.name}?`)) return;
+    await archiveClient(client.id);
+  };
 
   if (loading) {
     return (
@@ -43,7 +72,7 @@ function AppContent() {
 
   return (
     <div className="container animate-fade-in">
-      <header style={{ padding: '24px 0', marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <header style={{ padding: '24px 0', marginBottom: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
           <h1 style={{ fontSize: '1.85rem', color: '#2F4F4F', letterSpacing: '-0.02em' }}>Domestik</h1>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem' }}>Welcome back, <strong>{user.email?.split('@')[0]}</strong>!</p>
@@ -68,11 +97,67 @@ function AppContent() {
         </button>
       </header>
 
+      {isAdmin && (
+        <>
+          <div className="desktop-tabs">
+            <button
+              onClick={() => setActivePage('dashboard')}
+              style={{
+                flex: 1,
+                padding: '10px 0',
+                borderRadius: '999px',
+                border: '1px solid #E5E7EB',
+                background: activePage === 'dashboard' ? 'var(--text-main)' : 'var(--white)',
+                color: activePage === 'dashboard' ? 'white' : 'var(--text-main)',
+                fontWeight: 600,
+                cursor: 'pointer'
+              }}
+            >
+              Overview
+            </button>
+            <button
+              onClick={() => setActivePage('clients')}
+              style={{
+                flex: 1,
+                padding: '10px 0',
+                borderRadius: '999px',
+                border: '1px solid #E5E7EB',
+                background: activePage === 'clients' ? 'var(--text-main)' : 'var(--white)',
+                color: activePage === 'clients' ? 'white' : 'var(--text-main)',
+                fontWeight: 600,
+                cursor: 'pointer'
+              }}
+            >
+              Clients
+            </button>
+          </div>
+
+          <div className="bottom-nav">
+            <button
+              className={`bottom-nav-item ${activePage === 'dashboard' ? 'active' : ''}`}
+              onClick={() => setActivePage('dashboard')}
+            >
+              <LayoutDashboard size={24} />
+              <span>Overview</span>
+            </button>
+            <button
+              className={`bottom-nav-item ${activePage === 'clients' ? 'active' : ''}`}
+              onClick={() => setActivePage('clients')}
+            >
+              <Users size={24} />
+              <span>Clients</span>
+            </button>
+          </div>
+        </>
+      )}
+
       <MonthSelector selectedDate={selectedDate} onChange={setSelectedDate} />
 
-      <Dashboard services={services} />
+      {activePage === 'dashboard' && (
+        <>
+          <Dashboard services={services} />
 
-      {!isAdmin && (
+          {!isAdmin && (
         <div className="card" style={{ marginBottom: '24px', background: '#F0F9FF', border: '1px solid #BAE6FD', display: 'flex', gap: '12px', alignItems: 'center' }}>
           <div style={{ padding: '10px', background: '#7DD3FC', borderRadius: '10px', color: 'white' }}>
             <Users size={20} />
@@ -82,12 +167,12 @@ function AppContent() {
             <p style={{ color: '#075985', fontSize: '0.85rem' }}>Your account is being reviewed for admin privileges.</p>
           </div>
         </div>
-      )}
+          )}
 
-      {isAdmin && (
+          {isAdmin && (
         <div style={{ marginBottom: '24px', display: 'flex', gap: '12px' }}>
           <button
-            onClick={() => setIsClientModalOpen(true)}
+            onClick={handleOpenNewClient}
             className="card"
             style={{
               flex: 1,
@@ -107,15 +192,16 @@ function AppContent() {
             Add New Client
           </button>
         </div>
-      )}
+          )}
 
-      <ServiceHistory
-        services={services}
-        clients={clients}
-        onRefresh={fetchServices}
-      />
+          <ServiceHistory
+            services={services}
+            clients={clients}
+            onRefresh={fetchServices}
+            onEdit={handleEditService}
+          />
 
-      {isAdmin && (
+          {isAdmin && (
         <button
           className="fab"
           onClick={() => setIsServiceModalOpen(true)}
@@ -123,28 +209,118 @@ function AppContent() {
         >
           <Plus size={32} />
         </button>
+          )}
+        </>
+      )}
+
+      {activePage === 'clients' && isAdmin && (
+        <div className="card" style={{ marginBottom: '24px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+            <div>
+              <h2 style={{ fontSize: '1.1rem' }}>Clients</h2>
+              <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Totals for the selected month</p>
+            </div>
+            <button
+              onClick={handleOpenNewClient}
+              style={{
+                padding: '8px 12px',
+                borderRadius: '999px',
+                border: '1px solid #E5E7EB',
+                background: 'var(--white)',
+                cursor: 'pointer',
+                fontSize: '0.85rem',
+                fontWeight: 500
+              }}
+            >
+              + Add Client
+            </button>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {clients.map((client) => {
+              const stats = services.reduce(
+                (acc, s) => s.client_id === client.id
+                  ? {
+                      total: acc.total + s.total,
+                      hours: acc.hours + s.time_worked,
+                      count: acc.count + 1
+                    }
+                  : acc,
+                { total: 0, hours: 0, count: 0 }
+              );
+
+              return (
+                <div key={client.id} className="card" style={{ padding: '12px 14px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{ width: '32px', height: '32px', borderRadius: '999px', background: client.color }} />
+                  <div style={{ flex: 1 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                      <span style={{ fontWeight: 600 }}>{client.name}</span>
+                      <span style={{ fontWeight: 700 }}>${stats.total.toFixed(2)}</span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                      <span>{stats.count} services</span>
+                      <span>{stats.hours}h this month</span>
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', gap: '6px' }}>
+                    <button
+                      onClick={() => handleEditClient(client)}
+                      style={{ padding: '6px 10px', fontSize: '0.8rem', borderRadius: '999px', border: '1px solid #E5E7EB', background: 'var(--white)', cursor: 'pointer' }}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleArchiveClient(client)}
+                      style={{ padding: '6px 10px', fontSize: '0.8rem', borderRadius: '999px', border: '1px solid #FCA5A5', background: '#FEF2F2', color: '#B91C1C', cursor: 'pointer' }}
+                    >
+                      Archive
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+            {clients.length === 0 && (
+              <div style={{ textAlign: 'center', padding: '24px 0', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+                No clients yet. Add your first client to get started.
+              </div>
+            )}
+          </div>
+        </div>
       )}
 
       {/* Modals */}
       <Modal
         isOpen={isServiceModalOpen}
-        onClose={() => setIsServiceModalOpen(false)}
-        title="Register New Day"
+        onClose={handleCloseServiceModal}
+        title={editingService ? "Edit Service" : "Register New Day"}
       >
         <ServiceForm
           clients={clients}
-          onSave={async (s) => { await addService(s); }}
-          onClose={() => setIsServiceModalOpen(false)}
+          initialData={editingService}
+          onSave={async (s) => {
+            if (editingService) {
+              await updateService(editingService.id, s);
+            } else {
+              await addService(s);
+            }
+          }}
+          onClose={handleCloseServiceModal}
         />
       </Modal>
 
       <Modal
         isOpen={isClientModalOpen}
         onClose={() => setIsClientModalOpen(false)}
-        title="Add New Client"
+        title={editingClient ? "Edit Client" : "Add New Client"}
       >
         <ClientForm
-          onSave={async (n, c) => { await addClient(n, c); }}
+          initialClient={editingClient}
+          onSave={async (n, c) => {
+            if (editingClient) {
+              await updateClient(editingClient.id, { name: n, color: c });
+            } else {
+              await addClient(n, c);
+            }
+          }}
           onClose={() => setIsClientModalOpen(false)}
         />
       </Modal>

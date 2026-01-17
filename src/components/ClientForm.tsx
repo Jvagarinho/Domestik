@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
+import type { Client } from '../types';
 
 interface ClientFormProps {
+    initialClient?: Client;
     onSave: (name: string, color: string) => Promise<void>;
     onClose: () => void;
 }
@@ -20,9 +22,9 @@ const CLIENT_COLORS = [
     '#64748B'  // Slate
 ];
 
-export function ClientForm({ onSave, onClose }: ClientFormProps) {
-    const [name, setName] = useState('');
-    const [color, setColor] = useState(CLIENT_COLORS[0]);
+export function ClientForm({ initialClient, onSave, onClose }: ClientFormProps) {
+    const [name, setName] = useState(initialClient?.name || '');
+    const [color, setColor] = useState(initialClient?.color || CLIENT_COLORS[0]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -88,7 +90,7 @@ export function ClientForm({ onSave, onClose }: ClientFormProps) {
                     padding: '16px'
                 }}
             >
-                Add Client
+                {initialClient ? 'Save Changes' : 'Add Client'}
             </button>
         </form>
     );

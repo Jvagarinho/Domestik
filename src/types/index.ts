@@ -3,6 +3,7 @@ export interface Client {
     name: string;
     color: string;
     created_at?: string;
+    archived?: boolean;
 }
 
 export interface Service {

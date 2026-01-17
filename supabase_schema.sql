@@ -4,6 +4,7 @@ CREATE TABLE domestik_clients (
   name TEXT NOT NULL,
   color TEXT NOT NULL,
   user_id UUID REFERENCES auth.users(id) DEFAULT auth.uid(),
+  archived BOOLEAN DEFAULT FALSE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 

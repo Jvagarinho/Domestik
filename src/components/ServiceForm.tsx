@@ -3,16 +3,17 @@ import type { Client, Service } from '../types';
 
 interface ServiceFormProps {
     clients: Client[];
+    initialData?: Service;
     onSave: (service: Omit<Service, 'id' | 'created_at'>) => Promise<void>;
     onClose: () => void;
 }
 
-export function ServiceForm({ clients, onSave, onClose }: ServiceFormProps) {
+export function ServiceForm({ clients, initialData, onSave, onClose }: ServiceFormProps) {
     const [formData, setFormData] = useState({
-        date: new Date().toISOString().split('T')[0],
-        client_id: '',
-        time_worked: 4,
-        hourly_rate: 25,
+        date: initialData?.date || new Date().toISOString().split('T')[0],
+        client_id: initialData?.client_id || '',
+        time_worked: initialData?.time_worked || 4,
+        hourly_rate: initialData?.hourly_rate || 25,
     });
 
     const total = formData.time_worked * formData.hourly_rate;

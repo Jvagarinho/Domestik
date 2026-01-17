@@ -1,16 +1,17 @@
 import { useState } from 'react';
 import type { Service, Client } from '../types';
 import { format, parseISO } from 'date-fns';
-import { Filter, Trash2 } from 'lucide-react';
+import { Filter, Trash2, Edit2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 interface ServiceHistoryProps {
     services: Service[];
     clients: Client[];
     onRefresh: () => void;
+    onEdit: (service: Service) => void;
 }
 
-export function ServiceHistory({ services, clients, onRefresh }: ServiceHistoryProps) {
+export function ServiceHistory({ services, clients, onRefresh, onEdit }: ServiceHistoryProps) {
     const [filterClient, setFilterClient] = useState('');
 
     const filteredServices = filterClient
@@ -77,12 +78,22 @@ export function ServiceHistory({ services, clients, onRefresh }: ServiceHistoryP
                                             <span>{s.time_worked}h @ ${s.hourly_rate}/hr</span>
                                         </div>
                                     </div>
-                                    <button
-                                        onClick={() => handleDelete(s.id)}
-                                        style={{ background: 'none', color: '#ff4d4d', padding: '4px' }}
-                                    >
-                                        <Trash2 size={16} />
-                                    </button>
+                                    <div style={{ display: 'flex', gap: '4px' }}>
+                                        <button
+                                            onClick={() => onEdit(s)}
+                                            style={{ background: 'none', color: 'var(--primary-mint)', padding: '10px', cursor: 'pointer', border: 'none' }}
+                                            aria-label="Edit service"
+                                        >
+                                            <Edit2 size={20} />
+                                        </button>
+                                        <button
+                                            onClick={() => handleDelete(s.id)}
+                                            style={{ background: 'none', color: '#ff4d4d', padding: '10px', cursor: 'pointer', border: 'none' }}
+                                            aria-label="Delete service"
+                                        >
+                                            <Trash2 size={20} />
+                                        </button>
+                                    </div>
                                 </div>
                             ))}
                         </div>

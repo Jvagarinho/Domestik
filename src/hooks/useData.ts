@@ -13,7 +13,7 @@ export function useClients() {
             .select('*')
             .order('name');
 
-        if (data) setClients(data);
+        if (data) setClients((data as Client[]).filter(c => !c.archived));
         setLoading(false);
     };
 
@@ -33,11 +33,37 @@ export function useClients() {
         return { data, error };
     };
 
+    const updateClient = async (id: string, updates: Partial<Client>) => {
+        const { data, error } = await supabase
+            .from('domestik_clients')
+            .update(updates)
+            .eq('id', id)
+            .select('*');
+
+        if (data) {
+            setClients(clients.map(c => c.id === id ? data[0] as Client : c).sort((a, b) => a.name.localeCompare(b.name)));
+        }
+        return { data, error };
+    };
+
+    const archiveClient = async (id: string) => {
+        const { data, error } = await supabase
+            .from('domestik_clients')
+            .update({ archived: true })
+            .eq('id', id)
+            .select('*');
+
+        if (!error) {
+            setClients(clients.filter(c => c.id !== id));
+        }
+        return { data, error };
+    };
+
     useEffect(() => {
         fetchClients();
     }, []);
 
-    return { clients, loading, fetchClients, addClient };
+    return { clients, loading, fetchClients, addClient, updateClient, archiveClient };
 }
 
 export function useServices() {
@@ -76,9 +102,22 @@ export function useServices() {
         return { data, error };
     };
 
+    const updateService = async (id: string, updates: Partial<Service>) => {
+        const { data, error } = await supabase
+            .from('domestik_services')
+            .update(updates)
+            .eq('id', id)
+            .select('*, client:domestik_clients(*)');
+
+        if (data) {
+            setServices(services.map(s => s.id === id ? data[0] as Service : s));
+        }
+        return { data, error };
+    };
+
     useEffect(() => {
         fetchServices();
     }, []);
 
-    return { services, loading, fetchServices, addService };
+    return { services, loading, fetchServices, addService, updateService };
 }

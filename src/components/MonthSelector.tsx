@@ -27,11 +27,13 @@ export function MonthSelector({ selectedDate, onChange }: MonthSelectorProps) {
                 onClick={handlePrev}
                 style={{
                     background: '#F9FAFB',
-                    padding: '8px',
-                    borderRadius: '10px',
+                    padding: '12px',
+                    borderRadius: '12px',
                     color: 'var(--text-main)',
                     display: 'flex',
-                    alignItems: 'center'
+                    alignItems: 'center',
+                    border: 'none',
+                    cursor: 'pointer'
                 }}
                 aria-label="Previous Month"
             >
@@ -49,11 +51,13 @@ export function MonthSelector({ selectedDate, onChange }: MonthSelectorProps) {
                 onClick={handleNext}
                 style={{
                     background: '#F9FAFB',
-                    padding: '8px',
-                    borderRadius: '10px',
+                    padding: '12px',
+                    borderRadius: '12px',
                     color: 'var(--text-main)',
                     display: 'flex',
-                    alignItems: 'center'
+                    alignItems: 'center',
+                    border: 'none',
+                    cursor: 'pointer'
                 }}
                 aria-label="Next Month"
             >

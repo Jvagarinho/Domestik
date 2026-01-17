@@ -11,7 +11,7 @@ export function Dashboard({ services }: DashboardProps) {
     const serviceCount = services.length;
 
     return (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '16px', marginBottom: '32px' }}>
+        <div className="dashboard-grid">
             <div className="card" style={{ background: 'var(--financial-peach)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'rgba(0,0,0,0.5)' }}>MONTHLY EARNINGS</span>
