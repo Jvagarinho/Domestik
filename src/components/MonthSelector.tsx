@@ -1,5 +1,7 @@
 import { format, addMonths, subMonths } from 'date-fns';
 import { ChevronLeft, ChevronRight, CalendarDays } from 'lucide-react';
+import { ptBR } from 'date-fns/locale';
+import { useI18n } from '../i18n';
 
 interface MonthSelectorProps {
     selectedDate: Date;
@@ -7,6 +9,7 @@ interface MonthSelectorProps {
 }
 
 export function MonthSelector({ selectedDate, onChange }: MonthSelectorProps) {
+    const { t, language } = useI18n();
     const handlePrev = () => onChange(subMonths(selectedDate, 1));
     const handleNext = () => onChange(addMonths(selectedDate, 1));
     const handleCurrent = () => onChange(new Date());
@@ -35,7 +38,7 @@ export function MonthSelector({ selectedDate, onChange }: MonthSelectorProps) {
                     border: 'none',
                     cursor: 'pointer'
                 }}
-                aria-label="Previous Month"
+                aria-label={t('month.prev')}
             >
                 <ChevronLeft size={20} />
             </button>
@@ -43,7 +46,7 @@ export function MonthSelector({ selectedDate, onChange }: MonthSelectorProps) {
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }} onClick={handleCurrent}>
                 <CalendarDays size={20} color="var(--primary-emerald)" />
                 <span style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-main)', textTransform: 'capitalize' }}>
-                    {format(selectedDate, 'MMMM yyyy')}
+                    {format(selectedDate, 'MMMM yyyy', { locale: language === 'pt' ? ptBR : undefined })}
                 </span>
             </div>
 
@@ -59,7 +62,7 @@ export function MonthSelector({ selectedDate, onChange }: MonthSelectorProps) {
                     border: 'none',
                     cursor: 'pointer'
                 }}
-                aria-label="Next Month"
+                aria-label={t('month.next')}
             >
                 <ChevronRight size={20} />
             </button>

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import type { Client } from '../types';
+import { useI18n } from '../i18n';
 
 interface ClientFormProps {
     initialClient?: Client;
@@ -25,6 +26,7 @@ const CLIENT_COLORS = [
 export function ClientForm({ initialClient, onSave, onClose }: ClientFormProps) {
     const [name, setName] = useState(initialClient?.name || '');
     const [color, setColor] = useState(initialClient?.color || CLIENT_COLORS[0]);
+    const { t } = useI18n();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -36,10 +38,10 @@ export function ClientForm({ initialClient, onSave, onClose }: ClientFormProps) 
     return (
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
             <div>
-                <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-muted)' }}>Client Name</label>
+                <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-muted)' }}>{t('clientForm.nameLabel')}</label>
                 <input
                     type="text"
-                    placeholder="e.g. Maria Silva"
+                    placeholder={t('clientForm.namePlaceholder')}
                     value={name}
                     onChange={e => setName(e.target.value)}
                     required
@@ -48,7 +50,7 @@ export function ClientForm({ initialClient, onSave, onClose }: ClientFormProps) 
             </div>
 
             <div>
-                <label style={{ display: 'block', marginBottom: '12px', fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-muted)' }}>Identify with Color</label>
+                <label style={{ display: 'block', marginBottom: '12px', fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-muted)' }}>{t('clientForm.colorLabel')}</label>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '12px' }}>
                     {CLIENT_COLORS.map(c => (
                         <button
@@ -90,7 +92,7 @@ export function ClientForm({ initialClient, onSave, onClose }: ClientFormProps) 
                     padding: '16px'
                 }}
             >
-                {initialClient ? 'Save Changes' : 'Add Client'}
+                {initialClient ? t('clientForm.saveChanges') : t('clientForm.addClient')}
             </button>
         </form>
     );

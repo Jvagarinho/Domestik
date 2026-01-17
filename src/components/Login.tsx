@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { LogIn, Lock, Mail, Loader2, Home, UserPlus } from 'lucide-react';
+import { useI18n } from '../i18n';
 
 export function Login() {
     const [mode, setMode] = useState<'login' | 'signup'>('login');
@@ -9,6 +10,7 @@ export function Login() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
+    const { t } = useI18n();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -26,7 +28,7 @@ export function Login() {
         if (error) {
             setError(error.message);
         } else if (mode === 'signup') {
-            setSuccess('Registration successful! Please sign in.');
+            setSuccess(t('login.signupSuccess'));
             setMode('login');
         }
         setLoading(false);
@@ -70,21 +72,21 @@ export function Login() {
                         <Home size={36} />
                     </div>
                     <h1 style={{ fontSize: '1.75rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '8px' }}>
-                        {mode === 'login' ? 'Welcome Back' : 'Create Account'}
+                        {mode === 'login' ? t('login.title') : t('signup.title')}
                     </h1>
                     <p style={{ color: 'var(--text-muted)', fontSize: '1rem' }}>
-                        {mode === 'login' ? 'Enter your credentials to continue' : 'Join Domestik to start managing your business'}
+                        {mode === 'login' ? t('login.subtitle') : t('signup.subtitle')}
                     </p>
                 </div>
 
                 <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                     <div>
-                        <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: 'var(--text-muted)', marginBottom: '8px' }}>Email Address</label>
+                        <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: 'var(--text-muted)', marginBottom: '8px' }}>{t('login.emailLabel')}</label>
                         <div style={{ position: 'relative' }}>
                             <Mail size={20} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
                             <input
                                 type="email"
-                                placeholder="you@example.com"
+                                placeholder={t('login.emailPlaceholder')}
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 required
@@ -98,7 +100,7 @@ export function Login() {
                     </div>
 
                     <div>
-                        <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: 'var(--text-muted)', marginBottom: '8px' }}>Password</label>
+                        <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: 'var(--text-muted)', marginBottom: '8px' }}>{t('login.passwordLabel')}</label>
                         <div style={{ position: 'relative' }}>
                             <Lock size={20} style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
                             <input
@@ -163,13 +165,13 @@ export function Login() {
                         }}
                     >
                         {loading ? <Loader2 className="animate-spin" size={24} /> : (mode === 'login' ? <LogIn size={24} /> : <UserPlus size={24} />)}
-                        {loading ? 'Processing...' : (mode === 'login' ? 'Sign In' : 'Sign Up')}
+                        {loading ? t('login.processing') : (mode === 'login' ? t('login.signIn') : t('login.signUp'))}
                     </button>
                 </form>
 
                 <div style={{ textAlign: 'center', marginTop: '8px' }}>
                     <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem' }}>
-                        {mode === 'login' ? "Don't have an account?" : "Already have an account?"}
+                        {mode === 'login' ? t('login.noAccount') : t('login.haveAccount')}
                         {' '}
                         <button
                             onClick={() => {
@@ -185,7 +187,7 @@ export function Login() {
                                 padding: '4px'
                             }}
                         >
-                            {mode === 'login' ? 'Create one now' : 'Sign in instead'}
+                            {mode === 'login' ? t('login.createOne') : t('login.signInInstead')}
                         </button>
                     </p>
                 </div>

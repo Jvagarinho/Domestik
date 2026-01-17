@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { Client, Service } from '../types';
+import { useI18n } from '../i18n';
 
 interface ServiceFormProps {
     clients: Client[];
@@ -16,11 +17,14 @@ export function ServiceForm({ clients, initialData, onSave, onClose }: ServiceFo
         hourly_rate: initialData?.hourly_rate || 25,
     });
 
+    const { t, language } = useI18n();
+    const currencySymbol = language === 'pt' ? '€' : '$';
+
     const total = formData.time_worked * formData.hourly_rate;
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!formData.client_id) return alert('Please select a client');
+        if (!formData.client_id) return alert(t('serviceForm.selectClientAlert'));
 
         await onSave({
             ...formData,
@@ -32,7 +36,7 @@ export function ServiceForm({ clients, initialData, onSave, onClose }: ServiceFo
     return (
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <div>
-                <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', fontWeight: 500 }}>Date</label>
+                <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', fontWeight: 500 }}>{t('serviceForm.dateLabel')}</label>
                 <input
                     type="date"
                     value={formData.date}
@@ -42,13 +46,13 @@ export function ServiceForm({ clients, initialData, onSave, onClose }: ServiceFo
             </div>
 
             <div>
-                <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', fontWeight: 500 }}>Client</label>
+                <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', fontWeight: 500 }}>{t('serviceForm.clientLabel')}</label>
                 <select
                     value={formData.client_id}
                     onChange={e => setFormData({ ...formData, client_id: e.target.value })}
                     required
                 >
-                    <option value="">Select a client</option>
+                    <option value="">{t('serviceForm.clientPlaceholder')}</option>
                     {clients.map(c => (
                         <option key={c.id} value={c.id}>{c.name}</option>
                     ))}
@@ -57,7 +61,7 @@ export function ServiceForm({ clients, initialData, onSave, onClose }: ServiceFo
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                 <div>
-                    <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', fontWeight: 500 }}>Hours</label>
+                    <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', fontWeight: 500 }}>{t('serviceForm.hoursLabel')}</label>
                     <input
                         type="number"
                         step="0.5"
@@ -67,7 +71,7 @@ export function ServiceForm({ clients, initialData, onSave, onClose }: ServiceFo
                     />
                 </div>
                 <div>
-                    <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', fontWeight: 500 }}>Rate ($/hr)</label>
+                    <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.9rem', fontWeight: 500 }}>{t('serviceForm.rateLabel')}</label>
                     <input
                         type="number"
                         value={formData.hourly_rate}
@@ -86,12 +90,15 @@ export function ServiceForm({ clients, initialData, onSave, onClose }: ServiceFo
                 justifyContent: 'space-between',
                 alignItems: 'center'
             }}>
-                <span style={{ fontWeight: 600 }}>Total for the Day</span>
-                <span style={{ fontSize: '1.25rem', fontWeight: 700, color: '#2F4F4F' }}>${total.toFixed(2)}</span>
+                <span style={{ fontWeight: 600 }}>{t('serviceForm.totalLabel')}</span>
+                <span style={{ fontSize: '1.25rem', fontWeight: 700, color: '#2F4F4F' }}>
+                    {currencySymbol}
+                    {total.toFixed(2)}
+                </span>
             </div>
 
             <button type="submit" className="btn-primary" style={{ marginTop: '8px' }}>
-                Save Service
+                {t('serviceForm.save')}
             </button>
         </form>
     );

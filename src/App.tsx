@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Users, LogOut } from 'lucide-react';
+import { Plus, Users, LogOut, LayoutDashboard } from 'lucide-react';
 import { useClients, useServices } from './hooks/useData';
 import { Dashboard } from './components/Dashboard';
 import { ServiceHistory } from './components/ServiceHistory';
@@ -11,11 +11,14 @@ import { Login } from './components/Login';
 import { MonthSelector } from './components/MonthSelector';
 import { startOfMonth, endOfMonth, format } from 'date-fns';
 import type { Service, Client } from './types';
+import { isSupabaseConfigured } from './lib/supabase';
+import { I18nProvider, useI18n } from './i18n';
 
 function AppContent() {
   const { clients, addClient, updateClient, archiveClient } = useClients();
   const { services, addService, updateService, fetchServices } = useServices();
   const { user, isAdmin, signOut, loading } = useAuth();
+  const { t, language, setLanguage } = useI18n();
   const [selectedDate, setSelectedDate] = useState(new Date());
 
   const [isServiceModalOpen, setIsServiceModalOpen] = useState(false);
@@ -23,6 +26,7 @@ function AppContent() {
   const [editingClient, setEditingClient] = useState<Client | undefined>(undefined);
   const [activePage, setActivePage] = useState<'dashboard' | 'clients'>('dashboard');
   const [editingService, setEditingService] = useState<Service | undefined>(undefined);
+  const currencySymbol = language === 'pt' ? '€' : '$';
 
   useEffect(() => {
     if (user) {
@@ -53,7 +57,7 @@ function AppContent() {
   };
 
   const handleArchiveClient = async (client: Client) => {
-    if (!confirm(`Archive ${client.name}?`)) return;
+    if (!confirm(`${t('clients.archivePrefix')} ${client.name}?`)) return;
     await archiveClient(client.id);
   };
 
@@ -61,7 +65,7 @@ function AppContent() {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px' }}>
         <div className="animate-spin" style={{ width: '40px', height: '40px', border: '4px solid var(--primary-mint)', borderTopColor: 'transparent', borderRadius: '50%' }}></div>
-        <p style={{ color: 'var(--text-muted)', fontWeight: 500 }}>Initializing Domestik...</p>
+        <p style={{ color: 'var(--text-muted)', fontWeight: 500 }}>{t('app.loading')}</p>
       </div>
     );
   }
@@ -75,26 +79,46 @@ function AppContent() {
       <header style={{ padding: '24px 0', marginBottom: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
           <h1 style={{ fontSize: '1.85rem', color: '#2F4F4F', letterSpacing: '-0.02em' }}>Domestik</h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem' }}>Welcome back, <strong>{user.email?.split('@')[0]}</strong>!</p>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem' }}>
+            {t('app.welcomePrefix')} <strong>{user.email?.split('@')[0]}</strong>!
+          </p>
         </div>
-        <button
-          onClick={() => signOut()}
-          style={{
-            background: 'var(--white)',
-            border: '1px solid #E5E7EB',
-            color: 'var(--text-main)',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            fontSize: '0.9rem',
-            padding: '10px 16px',
-            borderRadius: '12px',
-            boxShadow: 'var(--shadow-soft)'
-          }}
-        >
-          <LogOut size={18} /> Sign Out
-        </button>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          <select
+            value={language}
+            onChange={(e) => setLanguage(e.target.value === 'pt' ? 'pt' : 'en')}
+            style={{
+              borderRadius: '999px',
+              border: '1px solid #E5E7EB',
+              padding: '8px 10px',
+              fontSize: '0.8rem',
+              background: 'var(--white)',
+              cursor: 'pointer'
+            }}
+            aria-label="Language"
+          >
+            <option value="en">EN</option>
+            <option value="pt">PT</option>
+          </select>
+          <button
+            onClick={() => signOut()}
+            style={{
+              background: 'var(--white)',
+              border: '1px solid #E5E7EB',
+              color: 'var(--text-main)',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              fontSize: '0.9rem',
+              padding: '10px 16px',
+              borderRadius: '12px',
+              boxShadow: 'var(--shadow-soft)'
+            }}
+          >
+            <LogOut size={18} /> {t('header.signOut')}
+          </button>
+        </div>
       </header>
 
       {isAdmin && (
@@ -113,7 +137,7 @@ function AppContent() {
                 cursor: 'pointer'
               }}
             >
-              Overview
+              {t('nav.overview')}
             </button>
             <button
               onClick={() => setActivePage('clients')}
@@ -128,7 +152,7 @@ function AppContent() {
                 cursor: 'pointer'
               }}
             >
-              Clients
+              {t('nav.clients')}
             </button>
           </div>
 
@@ -138,14 +162,14 @@ function AppContent() {
               onClick={() => setActivePage('dashboard')}
             >
               <LayoutDashboard size={24} />
-              <span>Overview</span>
+              <span>{t('nav.overview')}</span>
             </button>
             <button
               className={`bottom-nav-item ${activePage === 'clients' ? 'active' : ''}`}
               onClick={() => setActivePage('clients')}
             >
               <Users size={24} />
-              <span>Clients</span>
+              <span>{t('nav.clients')}</span>
             </button>
           </div>
         </>
@@ -163,8 +187,8 @@ function AppContent() {
             <Users size={20} />
           </div>
           <div>
-            <p style={{ fontWeight: 600, color: '#0369A1', fontSize: '0.95rem' }}>View-Only Mode</p>
-            <p style={{ color: '#075985', fontSize: '0.85rem' }}>Your account is being reviewed for admin privileges.</p>
+            <p style={{ fontWeight: 600, color: '#0369A1', fontSize: '0.95rem' }}>{t('viewOnly.title')}</p>
+            <p style={{ color: '#075985', fontSize: '0.85rem' }}>{t('viewOnly.description')}</p>
           </div>
         </div>
           )}
@@ -189,7 +213,7 @@ function AppContent() {
             }}
           >
             <Users size={22} color="var(--primary-indigo)" />
-            Add New Client
+            {t('dashboard.addNewClient')}
           </button>
         </div>
           )}
@@ -205,7 +229,7 @@ function AppContent() {
         <button
           className="fab"
           onClick={() => setIsServiceModalOpen(true)}
-          aria-label="Register New Day"
+          aria-label={t('fab.registerNewDay')}
         >
           <Plus size={32} />
         </button>
@@ -217,8 +241,8 @@ function AppContent() {
         <div className="card" style={{ marginBottom: '24px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
             <div>
-              <h2 style={{ fontSize: '1.1rem' }}>Clients</h2>
-              <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Totals for the selected month</p>
+              <h2 style={{ fontSize: '1.1rem' }}>{t('clients.title')}</h2>
+              <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{t('clients.subtitle')}</p>
             </div>
             <button
               onClick={handleOpenNewClient}
@@ -232,7 +256,7 @@ function AppContent() {
                 fontWeight: 500
               }}
             >
-              + Add Client
+              {t('clients.addButton')}
             </button>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -254,11 +278,19 @@ function AppContent() {
                   <div style={{ flex: 1 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
                       <span style={{ fontWeight: 600 }}>{client.name}</span>
-                      <span style={{ fontWeight: 700 }}>${stats.total.toFixed(2)}</span>
+                      <span style={{ fontWeight: 700 }}>
+                        {currencySymbol}
+                        {stats.total.toFixed(2)}
+                      </span>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                      <span>{stats.count} services</span>
-                      <span>{stats.hours}h this month</span>
+                      <span>
+                        {stats.count} {t('clients.stats.servicesSuffix')}
+                      </span>
+                      <span>
+                        {stats.hours}
+                        {t('clients.stats.hoursSuffix')}
+                      </span>
                     </div>
                   </div>
                   <div style={{ display: 'flex', gap: '6px' }}>
@@ -280,7 +312,7 @@ function AppContent() {
             })}
             {clients.length === 0 && (
               <div style={{ textAlign: 'center', padding: '24px 0', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-                No clients yet. Add your first client to get started.
+                {t('clients.empty')}
               </div>
             )}
           </div>
@@ -291,7 +323,7 @@ function AppContent() {
       <Modal
         isOpen={isServiceModalOpen}
         onClose={handleCloseServiceModal}
-        title={editingService ? "Edit Service" : "Register New Day"}
+        title={editingService ? t('modal.service.editTitle') : t('modal.service.newTitle')}
       >
         <ServiceForm
           clients={clients}
@@ -310,7 +342,7 @@ function AppContent() {
       <Modal
         isOpen={isClientModalOpen}
         onClose={() => setIsClientModalOpen(false)}
-        title={editingClient ? "Edit Client" : "Add New Client"}
+        title={editingClient ? t('modal.client.editTitle') : t('modal.client.newTitle')}
       >
         <ClientForm
           initialClient={editingClient}
@@ -328,11 +360,68 @@ function AppContent() {
   );
 }
 
-function App() {
+function RootApp() {
+  const { t } = useI18n();
+
+  if (!isSupabaseConfigured) {
+    return (
+      <div
+        style={{
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: '#f9f9f9'
+        }}
+      >
+        <div
+          style={{
+            background: 'white',
+            padding: '32px',
+            borderRadius: '16px',
+            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+            maxWidth: '500px',
+            width: '90%'
+          }}
+        >
+          <h1 style={{ color: '#ef4444', marginBottom: '16px', fontSize: '1.5rem' }}>{t('config.missingTitle')}</h1>
+          <p style={{ color: '#4b5563', marginBottom: '16px', lineHeight: 1.5 }}>
+            {t('config.missingBody')}
+          </p>
+          <div
+            style={{
+              background: '#f3f4f6',
+              padding: '16px',
+              borderRadius: '8px',
+              marginBottom: '24px',
+              fontFamily: 'monospace',
+              fontSize: '0.9rem',
+              overflowX: 'auto'
+            }}
+          >
+            VITE_SUPABASE_URL=...<br />
+            VITE_SUPABASE_ANON_KEY=...
+          </div>
+          <p style={{ color: '#6b7280', fontSize: '0.9rem' }}>
+            {t('config.missingFooter')}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <AuthProvider>
       <AppContent />
     </AuthProvider>
+  );
+}
+
+function App() {
+  return (
+    <I18nProvider>
+      <RootApp />
+    </I18nProvider>
   );
 }
 
