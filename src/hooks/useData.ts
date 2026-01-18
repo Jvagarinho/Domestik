@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import type { Client, Service } from '../types';
+import { useAuth } from './useAuth';
 
 export function useClients() {
     const [clients, setClients] = useState<Client[]>([]);
     const [loading, setLoading] = useState(true);
+    const { user } = useAuth();
 
     const fetchClients = async () => {
         setLoading(true);
@@ -60,8 +62,13 @@ export function useClients() {
     };
 
     useEffect(() => {
-        fetchClients();
-    }, []);
+        if (user) {
+            fetchClients();
+        } else {
+            setClients([]);
+            setLoading(false);
+        }
+    }, [user]);
 
     return { clients, loading, fetchClients, addClient, updateClient, archiveClient };
 }
