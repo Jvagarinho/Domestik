@@ -3,19 +3,22 @@ import type { Service, Client } from '../types';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Filter, Trash2, Edit2 } from 'lucide-react';
-import { supabase } from '../lib/supabase';
 import { useI18n } from '../i18n';
+import { useToast } from '../hooks/useToast';
+import { useConfirmModal } from './ConfirmModal';
 
 interface ServiceHistoryProps {
     services: Service[];
     clients: Client[];
-    onRefresh: () => void;
+    onDelete: (id: string) => Promise<{ success: boolean; error?: string }>;
     onEdit: (service: Service) => void;
 }
 
-export function ServiceHistory({ services, clients, onRefresh, onEdit }: ServiceHistoryProps) {
+export function ServiceHistory({ services, clients, onDelete, onEdit }: ServiceHistoryProps) {
     const [filterClient, setFilterClient] = useState('');
     const { t, language } = useI18n();
+    const { success, error } = useToast();
+    const { confirm, ConfirmModal } = useConfirmModal();
     const currencySymbol = language === 'pt' ? '€' : '$';
 
     const filteredServices = filterClient
@@ -33,9 +36,19 @@ export function ServiceHistory({ services, clients, onRefresh, onEdit }: Service
     });
 
     const handleDelete = async (id: string) => {
-        if (!confirm(t('history.confirmDelete'))) return;
-        const { error } = await supabase.from('services').delete().eq('id', id);
-        if (!error) onRefresh();
+        const confirmed = await confirm({
+            title: t('history.title'),
+            message: t('history.confirmDelete'),
+            variant: 'danger',
+        });
+        if (!confirmed) return;
+        
+        const result = await onDelete(id);
+        if (result.success) {
+            success(t('toast.serviceDeleted'));
+        } else {
+            error(result.error || t('toast.error'));
+        }
     };
 
     return (
@@ -142,6 +155,7 @@ export function ServiceHistory({ services, clients, onRefresh, onEdit }: Service
                     </div>
                 ))
             )}
+            <ConfirmModal />
         </div>
     );
 }

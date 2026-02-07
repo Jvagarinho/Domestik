@@ -13,12 +13,17 @@ import { startOfMonth, endOfMonth, format } from 'date-fns';
 import type { Service, Client } from './types';
 import { isSupabaseConfigured } from './lib/supabase';
 import { I18nProvider, useI18n } from './i18n';
+import { ToastProvider, useToast } from './hooks/useToast';
+import { Loading, CardSkeleton, DashboardSkeleton } from './components/Loading';
+import { useConfirmModal } from './components/ConfirmModal';
 
 function AppContent() {
-  const { clients, addClient, updateClient, archiveClient } = useClients();
-  const { services, addService, updateService, fetchServices } = useServices();
+  const { clients, loading: clientsLoading, addClient, updateClient, archiveClient } = useClients();
+  const { services, loading: servicesLoading, addService, updateService, deleteService, fetchServices } = useServices();
   const { user, isAdmin, signOut, loading } = useAuth();
   const { t, language, setLanguage } = useI18n();
+  const { success, error } = useToast();
+  const { confirm, ConfirmModal } = useConfirmModal();
   const [selectedDate, setSelectedDate] = useState(new Date());
 
   const [isServiceModalOpen, setIsServiceModalOpen] = useState(false);
@@ -57,17 +62,23 @@ function AppContent() {
   };
 
   const handleArchiveClient = async (client: Client) => {
-    if (!confirm(`${t('clients.archivePrefix')} ${client.name}?`)) return;
-    await archiveClient(client.id);
+    const confirmed = await confirm({
+      title: t('clients.archivePrefix'),
+      message: `${t('clients.archivePrefix')} ${client.name}?`,
+      variant: 'warning',
+      confirmText: t('clients.archivePrefix'),
+    });
+    if (!confirmed) return;
+    const result = await archiveClient(client.id);
+    if (result.success) {
+      success(t('toast.clientArchived'));
+    } else {
+      error(t('toast.error'));
+    }
   };
 
   if (loading) {
-    return (
-      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px' }}>
-        <div className="animate-spin" style={{ width: '40px', height: '40px', border: '4px solid var(--primary-mint)', borderTopColor: 'transparent', borderRadius: '50%' }}></div>
-        <p style={{ color: 'var(--text-muted)', fontWeight: 500 }}>{t('app.loading')}</p>
-      </div>
-    );
+    return <Loading fullScreen size="lg" text={t('app.loading')} />;
   }
 
   if (!user) {
@@ -179,7 +190,7 @@ function AppContent() {
 
       {activePage === 'dashboard' && (
         <>
-          <Dashboard services={services} />
+          {servicesLoading ? <DashboardSkeleton /> : <Dashboard services={services} />}
 
           {!isAdmin && (
         <div className="card" style={{ marginBottom: '24px', background: '#F0F9FF', border: '1px solid #BAE6FD', display: 'flex', gap: '12px', alignItems: 'center' }}>
@@ -221,7 +232,7 @@ function AppContent() {
           <ServiceHistory
             services={services}
             clients={clients}
-            onRefresh={fetchServices}
+            onDelete={deleteService}
             onEdit={handleEditService}
           />
 
@@ -259,6 +270,9 @@ function AppContent() {
               {t('clients.addButton')}
             </button>
           </div>
+          {clientsLoading ? (
+            <CardSkeleton count={5} />
+          ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {clients.map((client) => {
               const stats = services.reduce(
@@ -316,6 +330,7 @@ function AppContent() {
               </div>
             )}
           </div>
+          )}
         </div>
       )}
 
@@ -330,9 +345,15 @@ function AppContent() {
           initialData={editingService}
           onSave={async (s) => {
             if (editingService) {
-              await updateService(editingService.id, s);
+              const result = await updateService(editingService.id, s);
+              if (!result.success) {
+                throw new Error(result.error);
+              }
             } else {
-              await addService(s);
+              const result = await addService(s);
+              if (!result.success) {
+                throw new Error(result.error);
+              }
             }
           }}
           onClose={handleCloseServiceModal}
@@ -348,14 +369,22 @@ function AppContent() {
           initialClient={editingClient}
           onSave={async (n, c) => {
             if (editingClient) {
-              await updateClient(editingClient.id, { name: n, color: c });
+              const result = await updateClient(editingClient.id, { name: n, color: c });
+              if (!result.success) {
+                throw new Error(result.error);
+              }
             } else {
-              await addClient(n, c);
+              const result = await addClient(n, c);
+              if (!result.success) {
+                throw new Error(result.error);
+              }
             }
           }}
           onClose={() => setIsClientModalOpen(false)}
         />
       </Modal>
+
+      <ConfirmModal />
     </div>
   );
 }
@@ -411,9 +440,11 @@ function RootApp() {
   }
 
   return (
-    <AuthProvider>
-      <AppContent />
-    </AuthProvider>
+    <ToastProvider>
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
+    </ToastProvider>
   );
 }
 

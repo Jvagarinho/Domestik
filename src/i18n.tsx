@@ -62,7 +62,16 @@ const translations = {
     'history.confirmDelete': 'Are you sure you want to delete this entry?',
     'month.prev': 'Previous Month',
     'month.next': 'Next Month',
-    'header.signOut': 'Sign Out'
+    'header.signOut': 'Sign Out',
+    'toast.clientAdded': 'Client added successfully',
+    'toast.clientUpdated': 'Client updated successfully',
+    'toast.clientArchived': 'Client archived successfully',
+    'toast.serviceAdded': 'Service added successfully',
+    'toast.serviceUpdated': 'Service updated successfully',
+    'toast.serviceDeleted': 'Service deleted successfully',
+    'toast.error': 'An error occurred. Please try again.',
+    'confirmModal.cancel': 'Cancel',
+    'confirmModal.confirm': 'Confirm'
   },
   pt: {
     'app.loading': 'Iniciando o Domestik...',
@@ -125,7 +134,16 @@ const translations = {
     'history.confirmDelete': 'Tem certeza de que deseja excluir este registro?',
     'month.prev': 'Mês anterior',
     'month.next': 'Próximo mês',
-    'header.signOut': 'Sair'
+    'header.signOut': 'Sair',
+    'toast.clientAdded': 'Cliente adicionado com sucesso',
+    'toast.clientUpdated': 'Cliente atualizado com sucesso',
+    'toast.clientArchived': 'Cliente arquivado com sucesso',
+    'toast.serviceAdded': 'Serviço adicionado com sucesso',
+    'toast.serviceUpdated': 'Serviço atualizado com sucesso',
+    'toast.serviceDeleted': 'Serviço eliminado com sucesso',
+    'toast.error': 'Ocorreu um erro. Tente novamente.',
+    'confirmModal.cancel': 'Cancelar',
+    'confirmModal.confirm': 'Confirmar'
   }
 } as const;
 
