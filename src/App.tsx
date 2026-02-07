@@ -312,13 +312,13 @@ function AppContent() {
                       onClick={() => handleEditClient(client)}
                       style={{ padding: '6px 10px', fontSize: '0.8rem', borderRadius: '999px', border: '1px solid #E5E7EB', background: 'var(--white)', cursor: 'pointer' }}
                     >
-                      Edit
+                      {t('clients.editButton')}
                     </button>
                     <button
                       onClick={() => handleArchiveClient(client)}
                       style={{ padding: '6px 10px', fontSize: '0.8rem', borderRadius: '999px', border: '1px solid #FCA5A5', background: '#FEF2F2', color: '#B91C1C', cursor: 'pointer' }}
                     >
-                      Archive
+                      {t('clients.archiveButton')}
                     </button>
                   </div>
                 </div>
