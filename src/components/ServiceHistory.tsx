@@ -2,10 +2,11 @@ import { useState } from 'react';
 import type { Service, Client } from '../types';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Filter, Trash2, Edit2, ChevronDown, ChevronUp, X } from 'lucide-react';
+import { Filter, Trash2, Edit2, ChevronDown, ChevronUp, X, Download } from 'lucide-react';
 import { useI18n } from '../i18n';
 import { useToast } from '../hooks/useToast';
 import { useConfirmModal } from './ConfirmModal';
+import { ExportModal } from './ExportModal';
 
 type SortField = 'date' | 'value' | 'client';
 type SortOrder = 'asc' | 'desc';
@@ -15,9 +16,10 @@ interface ServiceHistoryProps {
     clients: Client[];
     onDelete: (id: string) => Promise<{ success: boolean; error?: string }>;
     onEdit: (service: Service) => void;
+    selectedDate: Date;
 }
 
-export function ServiceHistory({ services, clients, onDelete, onEdit }: ServiceHistoryProps) {
+export function ServiceHistory({ services, clients, onDelete, onEdit, selectedDate }: ServiceHistoryProps) {
     const [filterClient, setFilterClient] = useState('');
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
@@ -26,6 +28,7 @@ export function ServiceHistory({ services, clients, onDelete, onEdit }: ServiceH
     const [sortField, setSortField] = useState<SortField>('date');
     const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
     const [showFilters, setShowFilters] = useState(false);
+    const [showExportModal, setShowExportModal] = useState(false);
     const { t, language } = useI18n();
     const { success, error } = useToast();
     const { confirm, ConfirmModal } = useConfirmModal();
@@ -115,37 +118,57 @@ export function ServiceHistory({ services, clients, onDelete, onEdit }: ServiceH
 
     return (
         <div className="animate-fade-in">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
                 <h3 style={{ fontSize: '1.1rem' }}>{t('history.title')}</h3>
-                <button
-                    onClick={() => setShowFilters(!showFilters)}
-                    style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '6px',
-                        padding: '8px 12px',
-                        borderRadius: '8px',
-                        border: '1px solid #E5E7EB',
-                        background: hasActiveFilters ? '#F0FDF4' : 'white',
-                        color: hasActiveFilters ? '#10B981' : '#666',
-                        fontSize: '0.85rem',
-                        cursor: 'pointer'
-                    }}
-                >
-                    <Filter size={16} />
-                    {t('history.filters')}
-                    {hasActiveFilters && <span style={{ 
-                        background: '#10B981', 
-                        color: 'white', 
-                        borderRadius: '50%', 
-                        width: '18px', 
-                        height: '18px', 
-                        fontSize: '0.7rem',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                    }}>!</span>}
-                </button>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                    <button
+                        onClick={() => setShowExportModal(true)}
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            padding: '8px 12px',
+                            borderRadius: '8px',
+                            border: '1px solid #E5E7EB',
+                            background: 'white',
+                            color: '#666',
+                            fontSize: '0.85rem',
+                            cursor: 'pointer'
+                        }}
+                    >
+                        <Download size={16} />
+                        {t('export.button')}
+                    </button>
+                    <button
+                        onClick={() => setShowFilters(!showFilters)}
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            padding: '8px 12px',
+                            borderRadius: '8px',
+                            border: '1px solid #E5E7EB',
+                            background: hasActiveFilters ? '#F0FDF4' : 'white',
+                            color: hasActiveFilters ? '#10B981' : '#666',
+                            fontSize: '0.85rem',
+                            cursor: 'pointer'
+                        }}
+                    >
+                        <Filter size={16} />
+                        {t('history.filters')}
+                        {hasActiveFilters && <span style={{ 
+                            background: '#10B981', 
+                            color: 'white', 
+                            borderRadius: '50%', 
+                            width: '18px', 
+                            height: '18px', 
+                            fontSize: '0.7rem',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                        }}>!</span>}
+                    </button>
+                </div>
             </div>
 
             {/* Advanced Filters Panel */}
@@ -385,6 +408,20 @@ export function ServiceHistory({ services, clients, onDelete, onEdit }: ServiceH
                 ))
             )}
             <ConfirmModal />
+            <ExportModal 
+                isOpen={showExportModal}
+                onClose={() => setShowExportModal(false)}
+                services={filteredServices}
+                clients={clients}
+                selectedDate={selectedDate}
+                language={language}
+                filterClient={filterClient}
+                startDate={startDate}
+                endDate={endDate}
+                minValue={minValue}
+                maxValue={maxValue}
+                getClientName={(id) => clients.find(c => c.id === id)?.name || 'Unknown Client'}
+            />
         </div>
     );
 }

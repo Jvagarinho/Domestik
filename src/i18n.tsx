@@ -79,6 +79,13 @@ const translations = {
     'month.prev': 'Previous Month',
     'month.next': 'Next Month',
     'header.signOut': 'Sign Out',
+    'export.button': 'Export',
+    'export.title': 'Export Report',
+    'export.description': 'Choose a format to export your data',
+    'export.excel': 'Excel Spreadsheet',
+    'export.excelDesc': 'Compatible with Excel, Numbers, and Google Sheets',
+    'export.pdf': 'PDF Document',
+    'export.pdfDesc': 'Print-ready document with professional formatting',
     'toast.clientAdded': 'Client added successfully',
     'toast.clientUpdated': 'Client updated successfully',
     'toast.clientArchived': 'Client archived successfully',
@@ -167,6 +174,13 @@ const translations = {
     'month.prev': 'Mês anterior',
     'month.next': 'Próximo mês',
     'header.signOut': 'Sair',
+    'export.button': 'Exportar',
+    'export.title': 'Exportar Relatório',
+    'export.description': 'Escolha um formato para exportar seus dados',
+    'export.excel': 'Planilha Excel',
+    'export.excelDesc': 'Compatível com Excel, Numbers e Google Sheets',
+    'export.pdf': 'Documento PDF',
+    'export.pdfDesc': 'Documento pronto para impressão com formatação profissional',
     'toast.clientAdded': 'Cliente adicionado com sucesso',
     'toast.clientUpdated': 'Cliente atualizado com sucesso',
     'toast.clientArchived': 'Cliente arquivado com sucesso',
@@ -180,7 +194,7 @@ const translations = {
 } as const;
 
 type Language = 'en' | 'pt';
-type TranslationKey = keyof typeof translations.en;
+type TranslationKey = keyof typeof translations.en | keyof typeof translations.pt;
 
 interface I18nContextValue {
   language: Language;

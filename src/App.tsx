@@ -95,22 +95,26 @@ function AppContent() {
           </p>
         </div>
         <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-          <select
-            value={language}
-            onChange={(e) => setLanguage(e.target.value === 'pt' ? 'pt' : 'en')}
+          <button
+            onClick={() => setLanguage(language === 'pt' ? 'en' : 'pt')}
             style={{
-              borderRadius: '999px',
-              border: '1px solid #E5E7EB',
-              padding: '8px 10px',
-              fontSize: '0.8rem',
               background: 'var(--white)',
-              cursor: 'pointer'
+              border: '1px solid #E5E7EB',
+              color: 'var(--text-main)',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '0.9rem',
+              fontWeight: 500,
+              padding: '10px 16px',
+              borderRadius: '12px',
+              boxShadow: 'var(--shadow-soft)'
             }}
-            aria-label="Language"
+            aria-label={language === 'pt' ? 'Mudar para inglês' : 'Switch to Portuguese'}
           >
-            <option value="en">EN</option>
-            <option value="pt">PT</option>
-          </select>
+            {language === 'pt' ? 'EN' : 'PT'}
+          </button>
           <button
             onClick={() => signOut()}
             style={{
@@ -120,14 +124,16 @@ function AppContent() {
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
-              gap: '8px',
+              justifyContent: 'center',
               fontSize: '0.9rem',
+              fontWeight: 500,
               padding: '10px 16px',
               borderRadius: '12px',
               boxShadow: 'var(--shadow-soft)'
             }}
           >
-            <LogOut size={18} /> {t('header.signOut')}
+            <LogOut size={18} style={{ marginRight: '8px' }} />
+            {t('header.signOut')}
           </button>
         </div>
       </header>
@@ -234,6 +240,7 @@ function AppContent() {
             clients={clients}
             onDelete={deleteService}
             onEdit={handleEditService}
+            selectedDate={selectedDate}
           />
 
           {isAdmin && (
