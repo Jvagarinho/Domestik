@@ -36,9 +36,6 @@ export function Modal({ isOpen, onClose, title, children, maxWidth = '500px' }: 
 
     if (!isOpen) return null;
 
-    // Check if mobile
-    const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
-
     return (
         <div style={{
             position: 'fixed',
@@ -51,23 +48,24 @@ export function Modal({ isOpen, onClose, title, children, maxWidth = '500px' }: 
             alignItems: 'center',
             justifyContent: 'center',
             zIndex: 1000,
-            padding: isMobile ? '16px' : '20px',
+            padding: '16px',
             backdropFilter: 'blur(4px)',
-            overflow: 'auto',
+            overflowY: 'auto',
+            WebkitOverflowScrolling: 'touch',
         }} onClick={onClose}>
             <div
-                className="card animate-fade-in"
+                className="card"
                 style={{ 
                     width: '100%', 
-                    maxWidth: isMobile ? '100%' : maxWidth, 
+                    maxWidth: maxWidth, 
                     position: 'relative',
-                    borderRadius: isMobile ? '16px' : '16px',
+                    borderRadius: '16px',
                     margin: 'auto',
-                    maxHeight: isMobile ? 'calc(100vh - 32px)' : 'calc(100vh - 40px)',
-                    overflow: 'auto',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    animation: 'fadeIn 0.3s ease-out',
+                    maxHeight: '85vh',
+                    overflowY: 'auto',
+                    overflowX: 'hidden',
+                    WebkitOverflowScrolling: 'touch',
+                    backgroundColor: 'white',
                 }}
                 onClick={e => e.stopPropagation()}
             >
@@ -79,48 +77,31 @@ export function Modal({ isOpen, onClose, title, children, maxWidth = '500px' }: 
                     position: 'sticky',
                     top: 0,
                     backgroundColor: 'white',
-                    zIndex: 1,
-                    paddingTop: isMobile ? '16px' : '20px',
-                    paddingLeft: isMobile ? '16px' : '20px',
-                    paddingRight: isMobile ? '16px' : '20px',
-                    marginLeft: isMobile ? '-16px' : '-20px',
-                    marginRight: isMobile ? '-16px' : '-20px',
-                    marginTop: isMobile ? '-16px' : '-20px',
+                    zIndex: 10,
+                    padding: '20px 20px 0 20px',
+                    margin: '-20px -20px 20px -20px',
                 }}>
-                    <h2 style={{ fontSize: isMobile ? '1.1rem' : '1.25rem', margin: 0 }}>{title}</h2>
+                    <h2 style={{ fontSize: '1.25rem', margin: 0, padding: '20px 0 0 20px' }}>{title}</h2>
                     <button 
                         onClick={onClose} 
                         style={{ 
                             background: 'none', 
-                            padding: '8px',
-                            borderRadius: '8px',
+                            border: 'none',
+                            padding: '20px 20px 0 0',
+                            cursor: 'pointer',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            minWidth: '44px',
-                            minHeight: '44px',
                         }}
                         aria-label="Close modal"
                     >
                         <X size={24} color="#666" />
                     </button>
                 </div>
-                <div style={{ flex: 1, overflow: 'auto' }}>
+                <div style={{ padding: '0 20px 20px 20px' }}>
                     {children}
                 </div>
             </div>
-            <style>{`
-                @keyframes fadeIn {
-                    from {
-                        opacity: 0;
-                        transform: scale(0.95);
-                    }
-                    to {
-                        opacity: 1;
-                        transform: scale(1);
-                    }
-                }
-            `}</style>
         </div>
     );
 }
