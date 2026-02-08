@@ -81,9 +81,9 @@ export function ServiceHistory({ services, clients, onDelete, onEdit, selectedDa
     // Group by month (localized)
     const groups: { [key: string]: Service[] } = {};
     filteredServices.forEach(s => {
-        const month = format(parseISO(s.date), 'MMMM yyyy', {
+const month = format(parseISO(s.date), 'MMMM yyyy', {
             locale: language === 'pt' ? ptBR : undefined
-        });
+        }).replace(/^[a-z]/, (char) => char.toUpperCase());
         if (!groups[month]) groups[month] = [];
         groups[month].push(s);
     });

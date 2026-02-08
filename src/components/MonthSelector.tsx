@@ -46,7 +46,7 @@ export function MonthSelector({ selectedDate, onChange }: MonthSelectorProps) {
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }} onClick={handleCurrent}>
                 <CalendarDays size={20} color="var(--primary-emerald)" />
                 <span style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-main)', textTransform: 'capitalize' }}>
-                    {format(selectedDate, 'MMMM yyyy', { locale: language === 'pt' ? ptBR : undefined })}
+                    {format(selectedDate, 'MMMM yyyy', { locale: language === 'pt' ? ptBR : undefined }).replace(/^[a-z]/, (char) => char.toUpperCase())}
                 </span>
             </div>
 
