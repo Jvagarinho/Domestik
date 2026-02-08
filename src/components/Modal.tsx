@@ -11,18 +11,6 @@ interface ModalProps {
 }
 
 export function Modal({ isOpen, onClose, title, children, maxWidth = '500px' }: ModalProps) {
-    // Lock body scroll when modal is open
-    useEffect(() => {
-        if (isOpen) {
-            document.body.style.overflow = 'hidden';
-        } else {
-            document.body.style.overflow = 'unset';
-        }
-        return () => {
-            document.body.style.overflow = 'unset';
-        };
-    }, [isOpen]);
-
     // Handle escape key
     useEffect(() => {
         const handleEscape = (e: KeyboardEvent) => {
@@ -38,20 +26,18 @@ export function Modal({ isOpen, onClose, title, children, maxWidth = '500px' }: 
 
     return (
         <div style={{
-            position: 'fixed',
+            position: 'absolute',
             top: 0,
             left: 0,
             right: 0,
-            bottom: 0,
+            minHeight: '100vh',
             backgroundColor: 'rgba(0,0,0,0.5)',
             display: 'flex',
-            alignItems: 'center',
+            alignItems: 'flex-start',
             justifyContent: 'center',
             zIndex: 1000,
-            padding: '16px',
+            padding: '60px 16px',
             backdropFilter: 'blur(4px)',
-            overflowY: 'auto',
-            WebkitOverflowScrolling: 'touch',
         }} onClick={onClose}>
             <div
                 className="card"
@@ -60,45 +46,37 @@ export function Modal({ isOpen, onClose, title, children, maxWidth = '500px' }: 
                     maxWidth: maxWidth, 
                     position: 'relative',
                     borderRadius: '16px',
-                    margin: 'auto',
-                    maxHeight: '85vh',
-                    overflowY: 'auto',
-                    overflowX: 'hidden',
-                    WebkitOverflowScrolling: 'touch',
                     backgroundColor: 'white',
+                    marginTop: '20px',
+                    marginBottom: '20px',
                 }}
                 onClick={e => e.stopPropagation()}
             >
                 <div style={{ 
                     display: 'flex', 
                     justifyContent: 'space-between', 
-                    alignItems: 'center', 
-                    marginBottom: '20px',
-                    position: 'sticky',
-                    top: 0,
-                    backgroundColor: 'white',
-                    zIndex: 10,
-                    padding: '20px 20px 0 20px',
-                    margin: '-20px -20px 20px -20px',
+                    alignItems: 'center',
+                    padding: '20px',
+                    borderBottom: '1px solid #E5E7EB',
                 }}>
-                    <h2 style={{ fontSize: '1.25rem', margin: 0, padding: '20px 0 0 20px' }}>{title}</h2>
+                    <h2 style={{ fontSize: '1.25rem', margin: 0 }}>{title}</h2>
                     <button 
                         onClick={onClose} 
                         style={{ 
                             background: 'none', 
                             border: 'none',
-                            padding: '20px 20px 0 0',
                             cursor: 'pointer',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
+                            padding: '4px',
                         }}
                         aria-label="Close modal"
                     >
                         <X size={24} color="#666" />
                     </button>
                 </div>
-                <div style={{ padding: '0 20px 20px 20px' }}>
+                <div style={{ padding: '20px' }}>
                     {children}
                 </div>
             </div>
