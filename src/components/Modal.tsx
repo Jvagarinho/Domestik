@@ -48,11 +48,12 @@ export function Modal({ isOpen, onClose, title, children, maxWidth = '500px' }: 
             bottom: 0,
             backgroundColor: 'rgba(0,0,0,0.5)',
             display: 'flex',
-            alignItems: isMobile ? 'flex-end' : 'center',
+            alignItems: 'center',
             justifyContent: 'center',
             zIndex: 1000,
-            padding: isMobile ? '0' : '20px',
+            padding: isMobile ? '16px' : '20px',
             backdropFilter: 'blur(4px)',
+            overflow: 'auto',
         }} onClick={onClose}>
             <div
                 className="card animate-fade-in"
@@ -60,24 +61,16 @@ export function Modal({ isOpen, onClose, title, children, maxWidth = '500px' }: 
                     width: '100%', 
                     maxWidth: isMobile ? '100%' : maxWidth, 
                     position: 'relative',
-                    borderRadius: isMobile ? '20px 20px 0 0' : '16px',
-                    margin: isMobile ? '0' : '20px',
-                    maxHeight: isMobile ? '90vh' : 'calc(100vh - 40px)',
+                    borderRadius: isMobile ? '16px' : '16px',
+                    margin: 'auto',
+                    maxHeight: isMobile ? 'calc(100vh - 32px)' : 'calc(100vh - 40px)',
                     overflow: 'auto',
-                    animation: isMobile ? 'slide-up 0.3s ease-out' : 'fadeIn 0.3s ease-out',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    animation: 'fadeIn 0.3s ease-out',
                 }}
                 onClick={e => e.stopPropagation()}
             >
-                {/* Handle bar for mobile */}
-                {isMobile && (
-                    <div style={{
-                        width: '40px',
-                        height: '4px',
-                        backgroundColor: '#E5E7EB',
-                        borderRadius: '2px',
-                        margin: '0 auto 16px',
-                    }} />
-                )}
                 <div style={{ 
                     display: 'flex', 
                     justifyContent: 'space-between', 
@@ -87,6 +80,12 @@ export function Modal({ isOpen, onClose, title, children, maxWidth = '500px' }: 
                     top: 0,
                     backgroundColor: 'white',
                     zIndex: 1,
+                    paddingTop: isMobile ? '16px' : '20px',
+                    paddingLeft: isMobile ? '16px' : '20px',
+                    paddingRight: isMobile ? '16px' : '20px',
+                    marginLeft: isMobile ? '-16px' : '-20px',
+                    marginRight: isMobile ? '-16px' : '-20px',
+                    marginTop: isMobile ? '-16px' : '-20px',
                 }}>
                     <h2 style={{ fontSize: isMobile ? '1.1rem' : '1.25rem', margin: 0 }}>{title}</h2>
                     <button 
@@ -106,17 +105,19 @@ export function Modal({ isOpen, onClose, title, children, maxWidth = '500px' }: 
                         <X size={24} color="#666" />
                     </button>
                 </div>
-                {children}
+                <div style={{ flex: 1, overflow: 'auto' }}>
+                    {children}
+                </div>
             </div>
             <style>{`
-                @keyframes slide-up {
+                @keyframes fadeIn {
                     from {
                         opacity: 0;
-                        transform: translateY(100%);
+                        transform: scale(0.95);
                     }
                     to {
                         opacity: 1;
-                        transform: translateY(0);
+                        transform: scale(1);
                     }
                 }
             `}</style>
