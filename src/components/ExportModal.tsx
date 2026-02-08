@@ -25,14 +25,7 @@ export function ExportModal({ isOpen, onClose, services, clients, selectedDate, 
     if (!isOpen) return null;
 
     const handleExportExcel = () => {
-        exportToExcel(services, clients, language, selectedDate, {
-            filterClient,
-            startDate,
-            endDate,
-            minValue,
-            maxValue,
-            getClientName
-        });
+        exportToExcel(services, clients, language, selectedDate);
         onClose();
     };
 

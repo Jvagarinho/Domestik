@@ -45,7 +45,6 @@ export function exportToPDF(services: Service[], clients: Client[], language: 'e
     const currencySymbol = language === 'pt' ? '€' : '$';
     const monthName = format(selectedDate, language === 'pt' ? 'MMMM yyyy' : 'MMMM yyyy');
 
-    // Prepare filter info for header
     const filterInfo = [];
     if (filters?.filterClient && filters.getClientName) {
         filterInfo.push(`${language === 'pt' ? 'Cliente' : 'Client'}: ${filters.getClientName(filters.filterClient)}`);
@@ -155,7 +154,6 @@ export function exportToPDF(services: Service[], clients: Client[], language: 'e
         </html>
     `;
 
-    // Convert HTML to PDF and download
     const blob = new Blob([html], { type: 'text/html' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -163,7 +161,6 @@ export function exportToPDF(services: Service[], clients: Client[], language: 'e
     link.download = `Domestik_${monthName}_Report.html`;
     link.click();
     
-    // Clean up
     setTimeout(() => {
         URL.revokeObjectURL(url);
     }, 1000);
@@ -296,119 +293,4 @@ export function exportClientReportToPDF(_clientId: string, client: Client, servi
             printWindow.print();
         }, 250);
     }
-}
-}
-    if (filters?.endDate) {
-        filterInfo.push(`${language === 'pt' ? 'Até' : 'To'}: ${filters.endDate}`);
-    }
-    if (filters?.minValue) {
-        filterInfo.push(`${language === 'pt' ? 'Valor Mín.' : 'Min Value'}: ${currencySymbol}${filters.minValue}`);
-    }
-    if (filters?.maxValue) {
-        filterInfo.push(`${language === 'pt' ? 'Valor Máx.' : 'Max Value'}: ${currencySymbol}${filters.maxValue}`);
-    }
-
-    let html = `
-        <html>
-        <head>
-            <meta charset="utf-8">
-            <style>
-                body { font-family: Arial, sans-serif; padding: 40px; color: #333; }
-                h1 { color: #2F4F4F; border-bottom: 3px solid #2F4F4F; padding-bottom: 10px; }
-                .client-header { margin-top: 20px; padding: 15px; background: #F8F9FA; border-radius: 8px; border-left: 5px solid ${client.color}; }
-                table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-                th { background: ${client.color}; color: white; padding: 12px; text-align: left; }
-                td { padding: 10px; border-bottom: 1px solid #ddd; }
-                tr:nth-child(even) { background: #f9f9f9; }
-                .total-row { background: #E8F4F8 !important; font-weight: bold; }
-                .summary { margin-top: 30px; padding: 20px; background: #F8F9FA; border-radius: 8px; }
-                .summary-item { display: flex; justify-content: space-between; padding: 8px 0; }
-                .filter-info { margin-bottom: 20px; padding: 15px; background: #F0F9FF; border-radius: 8px; border-left: 4px solid #3B82F6; }
-                .filter-info h3 { margin-top: 0; color: #1E40AF; }
-                .filter-info ul { margin: 10px 0; padding-left: 20px; }
-                .filter-info li { margin: 5px 0; }
-            </style>
-        </head>
-        <body>
-            <h1>${language === 'pt' ? 'Relatório de Cliente' : 'Client Report'}</h1>
-            
-            <div class="client-header">
-                <h2 style="margin: 0; color: ${client.color};">${client.name}</h2>
-            </div>
-            
-            ${filterInfo.length > 0 ? `
-            <div class="filter-info">
-                <h3>${language === 'pt' ? 'Filtros Aplicados' : 'Applied Filters'}</h3>
-                <ul>
-                    ${filterInfo.map(info => `<li>${info}</li>`).join('')}
-                </ul>
-            </div>
-            ` : ''}
-
-            <div class="summary">
-                <div class="summary-item">
-                    <span>${language === 'pt' ? 'Total de Serviços' : 'Total Services'}:</span>
-                    <span>${services.length}</span>
-                </div>
-                <div class="summary-item">
-                    <span>${language === 'pt' ? 'Total de Horas' : 'Total Hours'}:</span>
-                    <span>${totalHours.toFixed(1)}h</span>
-                </div>
-                <div class="summary-item">
-                    <span>${language === 'pt' ? 'Valor Total' : 'Total Value'}:</span>
-                    <span><strong>${currencySymbol}${total.toFixed(2)}</strong></span>
-                </div>
-            </div>
-
-            <h2>${language === 'pt' ? 'Histórico de Serviços' : 'Service History'}</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>${language === 'pt' ? 'Data' : 'Date'}</th>
-                        <th>${language === 'pt' ? 'Horas' : 'Hours'}</th>
-                        <th>${language === 'pt' ? 'Taxa/Hora' : 'Rate/Hr'}</th>
-                        <th>${language === 'pt' ? 'Total' : 'Total'}</th>
-                    </tr>
-                </thead>
-                <tbody>
-    `;
-
-    services.forEach(service => {
-        html += `
-            <tr>
-                <td>${service.date}</td>
-                <td>${service.time_worked}</td>
-                <td>${currencySymbol}${service.hourly_rate.toFixed(2)}</td>
-                <td>${currencySymbol}${service.total.toFixed(2)}</td>
-            </tr>
-        `;
-    });
-
-    html += `
-                <tr class="total-row">
-                    <td colspan="3">${language === 'pt' ? 'TOTAL' : 'TOTAL'}</td>
-                    <td>${currencySymbol}${total.toFixed(2)}</td>
-                </tr>
-                </tbody>
-            </table>
-            
-            <p style="margin-top: 40px; color: #999; font-size: 12px; text-align: center;">
-                ${language === 'pt' ? 'Gerado por Domestik' : 'Generated by Domestik'} - ${format(new Date(), 'yyyy-MM-dd HH:mm')}
-            </p>
-        </body>
-        </html>
-    `;
-
-    // Convert HTML to PDF and download
-    const blob = new Blob([html], { type: 'text/html' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `Domestik_${client.name.replace(/\s+/g, '_')}_Report.html`;
-    link.click();
-    
-    // Clean up
-    setTimeout(() => {
-        URL.revokeObjectURL(url);
-    }, 1000);
 }
