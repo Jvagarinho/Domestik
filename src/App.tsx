@@ -436,6 +436,35 @@ function AppContent() {
       </Modal>
 
       <ConfirmModal />
+
+      {/* Footer */}
+      <footer style={{
+        marginTop: '40px',
+        padding: '24px 0',
+        borderTop: '1px solid #E5E7EB',
+        textAlign: 'center',
+        color: '#6B7280',
+        fontSize: '0.875rem'
+      }}>
+        <p style={{ margin: '0 0 8px 0' }}>
+          © {new Date().getFullYear()} IterioTech. All rights reserved.
+        </p>
+        <p style={{ margin: '0 0 8px 0', fontStyle: 'italic' }}>
+          Building the future of application development, one iteration at a time.
+        </p>
+        <a 
+          href="https://iteriotech.com" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          style={{
+            color: '#3B82F6',
+            textDecoration: 'none',
+            fontWeight: 500
+          }}
+        >
+          iteriotech.com
+        </a>
+      </footer>
     </div>
   );
 }
