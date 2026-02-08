@@ -52,6 +52,17 @@ function AppContent() {
     setEditingService(undefined);
   };
 
+  const handleDeleteService = async (id: string) => {
+    const result = await deleteService(id);
+    if (result.success) {
+      // Refetch services to ensure filters are applied correctly
+      const start = format(startOfMonth(selectedDate), 'yyyy-MM-dd');
+      const end = format(endOfMonth(selectedDate), 'yyyy-MM-dd');
+      await fetchServices(undefined, start, end);
+    }
+    return result;
+  };
+
   const handleOpenNewClient = () => {
     setEditingClient(undefined);
     setIsClientModalOpen(true);
@@ -261,7 +272,7 @@ function AppContent() {
           <ServiceHistory
             services={services}
             clients={clients}
-            onDelete={deleteService}
+            onDelete={handleDeleteService}
             onEdit={handleEditService}
             onAdd={isAdmin ? () => setIsServiceModalOpen(true) : undefined}
             selectedDate={selectedDate}

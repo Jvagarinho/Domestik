@@ -260,22 +260,20 @@ export function useServices(): UseServicesReturn {
         }
 
         try {
-            const { data, error: insertError } = await supabase
+            const { error: insertError } = await supabase
                 .from('domestik_services')
                 .insert([{
                     ...validation.data,
                     user_id: user.id
-                }])
-                .select('*, client:domestik_clients(*)');
+                }]);
 
             if (insertError) {
                 console.error('Error adding service:', insertError);
                 throw new Error('Failed to add service');
             }
             
-            if (data) {
-                setServices(prev => [data[0] as Service, ...prev]);
-            }
+            // Não atualizamos o estado localmente aqui
+            // O componente pai deve fazer refetch para aplicar os filtros corretamente
             return { success: true };
         } catch (err) {
             const errorMsg = err instanceof Error ? err.message : 'Failed to add service';
@@ -310,24 +308,20 @@ export function useServices(): UseServicesReturn {
         }
 
         try {
-            const { data, error: updateError } = await supabase
+            const { error: updateError } = await supabase
                 .from('domestik_services')
                 .update(updates)
                 .eq('id', id)
-                .eq('user_id', user.id) // Garantir que só atualiza se for o dono
-                .select('*, client:domestik_clients(*)');
+                .eq('user_id', user.id); // Garantir que só atualiza se for o dono
 
             if (updateError) {
                 console.error('Error updating service:', updateError);
                 throw new Error('Failed to update service');
             }
 
-            if (data && data.length > 0) {
-                setServices(prev => prev.map(s => s.id === id ? data[0] as Service : s));
-                return { success: true };
-            } else {
-                return { success: false, error: 'Service not found or access denied' };
-            }
+            // Não atualizamos o estado localmente aqui
+            // O componente pai deve fazer refetch para aplicar os filtros corretamente
+            return { success: true };
         } catch (err) {
             const errorMsg = err instanceof Error ? err.message : 'Failed to update service';
             return { success: false, error: errorMsg };
@@ -357,7 +351,8 @@ export function useServices(): UseServicesReturn {
                 throw new Error('Failed to delete service');
             }
             
-            setServices(prev => prev.filter(s => s.id !== id));
+            // Não atualizamos o estado localmente aqui
+            // O componente pai deve fazer refetch para aplicar os filtros corretamente
             return { success: true };
         } catch (err) {
             const errorMsg = err instanceof Error ? err.message : 'Failed to delete service';
