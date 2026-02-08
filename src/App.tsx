@@ -382,6 +382,10 @@ function AppContent() {
                 throw new Error(result.error);
               }
             }
+            // Refetch services to ensure we only show services for the selected month
+            const start = format(startOfMonth(selectedDate), 'yyyy-MM-dd');
+            const end = format(endOfMonth(selectedDate), 'yyyy-MM-dd');
+            await fetchServices(undefined, start, end);
           }}
           onClose={handleCloseServiceModal}
         />
