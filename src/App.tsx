@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Users, LogOut, LayoutDashboard, BarChart3 } from 'lucide-react';
+import { Users, LogOut, LayoutDashboard, BarChart3 } from 'lucide-react';
 import { useClients, useServices } from './hooks/useData';
 import { Dashboard } from './components/Dashboard';
 import { DashboardAdvanced } from './components/DashboardAdvanced';
@@ -263,18 +263,9 @@ function AppContent() {
             clients={clients}
             onDelete={deleteService}
             onEdit={handleEditService}
+            onAdd={isAdmin ? () => setIsServiceModalOpen(true) : undefined}
             selectedDate={selectedDate}
           />
-
-          {isAdmin && (
-        <button
-          className="fab"
-          onClick={() => setIsServiceModalOpen(true)}
-          aria-label={t('fab.registerNewDay')}
-        >
-          <Plus size={32} />
-        </button>
-          )}
         </>
       )}
 

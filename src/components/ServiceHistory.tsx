@@ -2,7 +2,7 @@ import { useState } from 'react';
 import type { Service, Client } from '../types';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Filter, Trash2, Edit2, ChevronDown, ChevronUp, X, Download } from 'lucide-react';
+import { Filter, Trash2, Edit2, ChevronDown, ChevronUp, X, Download, Plus } from 'lucide-react';
 import { useI18n } from '../i18n';
 import { useToast } from '../hooks/useToast';
 import { useConfirmModal } from './ConfirmModal';
@@ -16,10 +16,11 @@ interface ServiceHistoryProps {
     clients: Client[];
     onDelete: (id: string) => Promise<{ success: boolean; error?: string }>;
     onEdit: (service: Service) => void;
+    onAdd?: () => void;
     selectedDate: Date;
 }
 
-export function ServiceHistory({ services, clients, onDelete, onEdit, selectedDate }: ServiceHistoryProps) {
+export function ServiceHistory({ services, clients, onDelete, onEdit, onAdd, selectedDate }: ServiceHistoryProps) {
     const [filterClient, setFilterClient] = useState('');
     const [startDate, setStartDate] = useState('');
     const [endDate, setEndDate] = useState('');
@@ -121,6 +122,27 @@ const month = format(parseISO(s.date), 'MMMM yyyy', {
 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
                 <h3 style={{ fontSize: '1.1rem' }}>{t('history.title')}</h3>
                 <div style={{ display: 'flex', gap: '8px' }}>
+                    {onAdd && (
+                        <button
+                            onClick={onAdd}
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '6px',
+                                padding: '8px 12px',
+                                borderRadius: '8px',
+                                border: 'none',
+                                background: '#10B981',
+                                color: 'white',
+                                fontSize: '0.85rem',
+                                fontWeight: 600,
+                                cursor: 'pointer'
+                            }}
+                        >
+                            <Plus size={18} />
+                            {t('fab.registerNewDay')}
+                        </button>
+                    )}
                     <button
                         onClick={() => setShowExportModal(true)}
                         style={{
