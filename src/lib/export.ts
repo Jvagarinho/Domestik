@@ -10,27 +10,9 @@ interface ExportFilters {
     getClientName?: (id: string) => string;
 }
 
-export function exportToExcel(services: Service[], clients: Client[], language: 'en' | 'pt', selectedDate: Date, filters?: ExportFilters): void {
+export function exportToExcel(services: Service[], clients: Client[], language: 'en' | 'pt', selectedDate: Date): void {
     const currencySymbol = language === 'pt' ? '€' : '$';
     const monthName = format(selectedDate, language === 'pt' ? 'MMMM yyyy' : 'MMMM yyyy');
-
-    // Prepare filter info for header
-    const filterInfo = [];
-    if (filters?.filterClient && filters.getClientName) {
-        filterInfo.push(`${language === 'pt' ? 'Cliente' : 'Client'}: ${filters.getClientName(filters.filterClient)}`);
-    }
-    if (filters?.startDate) {
-        filterInfo.push(`${language === 'pt' ? 'De' : 'From'}: ${filters.startDate}`);
-    }
-    if (filters?.endDate) {
-        filterInfo.push(`${language === 'pt' ? 'Até' : 'To'}: ${filters.endDate}`);
-    }
-    if (filters?.minValue) {
-        filterInfo.push(`${language === 'pt' ? 'Valor Mín.' : 'Min Value'}: ${currencySymbol}${filters.minValue}`);
-    }
-    if (filters?.maxValue) {
-        filterInfo.push(`${language === 'pt' ? 'Valor Máx.' : 'Max Value'}: ${currencySymbol}${filters.maxValue}`);
-    }
 
     const rows = [
         [language === 'pt' ? 'Data' : 'Date', language === 'pt' ? 'Cliente' : 'Client', language === 'pt' ? 'Horas' : 'Hours', language === 'pt' ? 'Taxa/Hora' : 'Rate/Hr', language === 'pt' ? 'Total' : 'Total']
@@ -49,12 +31,6 @@ export function exportToExcel(services: Service[], clients: Client[], language: 
     });
 
     const total = services.reduce((sum, s) => sum + s.total, 0);
-    
-    // Add filter info if any filters are applied
-    if (filterInfo.length > 0) {
-        rows.unshift([''], [language === 'pt' ? 'Filtros Aplicados' : 'Applied Filters'], ...filterInfo.map(info => [info]), ['']);
-    }
-    
     rows.push(['', '', '', language === 'pt' ? 'TOTAL' : 'TOTAL', `${currencySymbol}${total.toFixed(2)}`]);
 
     const csvContent = rows.map(row => row.join(',')).join('\n');
@@ -193,7 +169,7 @@ export function exportToPDF(services: Service[], clients: Client[], language: 'e
     }, 1000);
 }
 
-export function exportClientReportToExcel(_clientId: string, client: Client, services: Service[], language: 'en' | 'pt', filters?: ExportFilters): void {
+export function exportClientReportToExcel(_clientId: string, client: Client, services: Service[], language: 'en' | 'pt'): void {
     const currencySymbol = language === 'pt' ? '€' : '$';
     const rows = [
         [language === 'pt' ? 'Relatório de Cliente' : 'Client Report'],
@@ -228,17 +204,100 @@ export function exportClientReportToExcel(_clientId: string, client: Client, ser
     link.click();
 }
 
-export function exportClientReportToPDF(_clientId: string, client: Client, services: Service[], language: 'en' | 'pt', filters?: ExportFilters): void {
+export function exportClientReportToPDF(_clientId: string, client: Client, services: Service[], language: 'en' | 'pt'): void {
     const currencySymbol = language === 'pt' ? '€' : '$';
 
     const total = services.reduce((sum, s) => sum + s.total, 0);
     const totalHours = services.reduce((sum, s) => sum + s.time_worked, 0);
 
-    // Prepare filter info for header
-    const filterInfo = [];
-    if (filters?.startDate) {
-        filterInfo.push(`${language === 'pt' ? 'De' : 'From'}: ${filters.startDate}`);
+    let html = `
+        <html>
+        <head>
+            <meta charset="utf-8">
+            <style>
+                body { font-family: Arial, sans-serif; padding: 40px; color: #333; }
+                h1 { color: #2F4F4F; border-bottom: 3px solid #2F4F4F; padding-bottom: 10px; }
+                .client-header { margin-top: 20px; padding: 15px; background: #F8F9FA; border-radius: 8px; border-left: 5px solid ${client.color}; }
+                table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                th { background: ${client.color}; color: white; padding: 12px; text-align: left; }
+                td { padding: 10px; border-bottom: 1px solid #ddd; }
+                tr:nth-child(even) { background: #f9f9f9; }
+                .total-row { background: #E8F4F8 !important; font-weight: bold; }
+                .summary { margin-top: 30px; padding: 20px; background: #F8F9FA; border-radius: 8px; }
+                .summary-item { display: flex; justify-content: space-between; padding: 8px 0; }
+            </style>
+        </head>
+        <body>
+            <h1>${language === 'pt' ? 'Relatório de Cliente' : 'Client Report'}</h1>
+            
+            <div class="client-header">
+                <h2 style="margin: 0; color: ${client.color};">${client.name}</h2>
+            </div>
+
+            <div class="summary">
+                <div class="summary-item">
+                    <span>${language === 'pt' ? 'Total de Serviços' : 'Total Services'}:</span>
+                    <span>${services.length}</span>
+                </div>
+                <div class="summary-item">
+                    <span>${language === 'pt' ? 'Total de Horas' : 'Total Hours'}:</span>
+                    <span>${totalHours.toFixed(1)}h</span>
+                </div>
+                <div class="summary-item">
+                    <span>${language === 'pt' ? 'Valor Total' : 'Total Value'}:</span>
+                    <span><strong>${currencySymbol}${total.toFixed(2)}</strong></span>
+                </div>
+            </div>
+
+            <h2>${language === 'pt' ? 'Histórico de Serviços' : 'Service History'}</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>${language === 'pt' ? 'Data' : 'Date'}</th>
+                        <th>${language === 'pt' ? 'Horas' : 'Hours'}</th>
+                        <th>${language === 'pt' ? 'Taxa/Hora' : 'Rate/Hr'}</th>
+                        <th>${language === 'pt' ? 'Total' : 'Total'}</th>
+                    </tr>
+                </thead>
+                <tbody>
+    `;
+
+    services.forEach(service => {
+        html += `
+            <tr>
+                <td>${service.date}</td>
+                <td>${service.time_worked}</td>
+                <td>${currencySymbol}${service.hourly_rate.toFixed(2)}</td>
+                <td>${currencySymbol}${service.total.toFixed(2)}</td>
+            </tr>
+        `;
+    });
+
+    html += `
+                <tr class="total-row">
+                    <td colspan="3">${language === 'pt' ? 'TOTAL' : 'TOTAL'}</td>
+                    <td>${currencySymbol}${total.toFixed(2)}</td>
+                </tr>
+                </tbody>
+            </table>
+            
+            <p style="margin-top: 40px; color: #999; font-size: 12px; text-align: center;">
+                ${language === 'pt' ? 'Gerado por Domestik' : 'Generated by Domestik'} - ${format(new Date(), 'yyyy-MM-dd HH:mm')}
+            </p>
+        </body>
+        </html>
+    `;
+
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+        printWindow.document.write(html);
+        printWindow.document.close();
+        setTimeout(() => {
+            printWindow.print();
+        }, 250);
     }
+}
+}
     if (filters?.endDate) {
         filterInfo.push(`${language === 'pt' ? 'Até' : 'To'}: ${filters.endDate}`);
     }
