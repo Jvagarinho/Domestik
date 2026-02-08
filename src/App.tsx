@@ -10,7 +10,7 @@ import { ClientForm } from './components/ClientForm';
 import { AuthProvider, useAuth } from './hooks/useAuth';
 import { Login } from './components/Login';
 import { MonthSelector } from './components/MonthSelector';
-import { startOfMonth, endOfMonth, format } from 'date-fns';
+import { startOfMonth, endOfMonth, startOfYear, endOfYear, format } from 'date-fns';
 import type { Service, Client } from './types';
 import { isSupabaseConfigured } from './lib/supabase';
 import { I18nProvider, useI18n } from './i18n';
@@ -41,6 +41,15 @@ function AppContent() {
       fetchServices(undefined, start, end);
     }
   }, [user, selectedDate]);
+
+  // Fetch yearly services for charts
+  useEffect(() => {
+    if (user && activePage === 'charts') {
+      const yearStart = format(startOfYear(selectedDate), 'yyyy-MM-dd');
+      const yearEnd = format(endOfYear(selectedDate), 'yyyy-MM-dd');
+      fetchServices(undefined, yearStart, yearEnd);
+    }
+  }, [user, activePage, selectedDate]);
 
   const handleEditService = (service: Service) => {
     setEditingService(service);
