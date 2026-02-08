@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Plus, Users, LogOut, LayoutDashboard } from 'lucide-react';
+import { Plus, Users, LogOut, LayoutDashboard, BarChart3 } from 'lucide-react';
 import { useClients, useServices } from './hooks/useData';
 import { Dashboard } from './components/Dashboard';
+import { DashboardAdvanced } from './components/DashboardAdvanced';
 import { ServiceHistory } from './components/ServiceHistory';
 import { Modal } from './components/Modal';
 import { ServiceForm } from './components/ServiceForm';
@@ -29,7 +30,7 @@ function AppContent() {
   const [isServiceModalOpen, setIsServiceModalOpen] = useState(false);
   const [isClientModalOpen, setIsClientModalOpen] = useState(false);
   const [editingClient, setEditingClient] = useState<Client | undefined>(undefined);
-  const [activePage, setActivePage] = useState<'dashboard' | 'clients'>('dashboard');
+  const [activePage, setActivePage] = useState<'dashboard' | 'clients' | 'charts'>('dashboard');
   const [editingService, setEditingService] = useState<Service | undefined>(undefined);
   const currencySymbol = language === 'pt' ? '€' : '$';
 
@@ -171,6 +172,21 @@ function AppContent() {
             >
               {t('nav.clients')}
             </button>
+            <button
+              onClick={() => setActivePage('charts')}
+              style={{
+                flex: 1,
+                padding: '10px 0',
+                borderRadius: '999px',
+                border: '1px solid #E5E7EB',
+                background: activePage === 'charts' ? 'var(--text-main)' : 'var(--white)',
+                color: activePage === 'charts' ? 'white' : 'var(--text-main)',
+                fontWeight: 600,
+                cursor: 'pointer'
+              }}
+            >
+              {t('nav.charts')}
+            </button>
           </div>
 
           <div className="bottom-nav">
@@ -187,6 +203,13 @@ function AppContent() {
             >
               <Users size={24} />
               <span>{t('nav.clients')}</span>
+            </button>
+            <button
+              className={`bottom-nav-item ${activePage === 'charts' ? 'active' : ''}`}
+              onClick={() => setActivePage('charts')}
+            >
+              <BarChart3 size={24} />
+              <span>{t('nav.charts')}</span>
             </button>
           </div>
         </>
@@ -338,6 +361,12 @@ function AppContent() {
             )}
           </div>
           )}
+        </div>
+      )}
+
+      {activePage === 'charts' && (
+        <div style={{ marginBottom: '24px' }}>
+          {servicesLoading ? <DashboardSkeleton /> : <DashboardAdvanced services={services} />}
         </div>
       )}
 
