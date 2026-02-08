@@ -361,12 +361,11 @@ export function useServices(): UseServicesReturn {
     };
 
     useEffect(() => {
-        if (user) {
-            fetchServices();
-        } else {
+        if (!user) {
             setServices([]);
             setLoading(false);
         }
+        // Não chamamos fetchServices aqui - o App.tsx controla isso com base na data selecionada
     }, [user]);
 
     return { services, loading, error, fetchServices, addService, updateService, deleteService, isOwner };
