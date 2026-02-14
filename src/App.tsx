@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Users, LogOut, LayoutDashboard, BarChart3 } from 'lucide-react';
+import { Users, LogOut, LayoutDashboard, BarChart3, Play, Square } from 'lucide-react';
 import { useClients, useServices } from './hooks/useData';
 import { Dashboard } from './components/Dashboard';
 import { DashboardAdvanced } from './components/DashboardAdvanced';
@@ -17,6 +17,7 @@ import { I18nProvider, useI18n } from './i18n';
 import { ToastProvider, useToast } from './hooks/useToast';
 import { Loading, CardSkeleton, DashboardSkeleton } from './components/Loading';
 import { useConfirmModal } from './components/ConfirmModal';
+import { demoClients, generateDemoServices } from './lib/demoData';
 
 function AppContent() {
   const { clients, loading: clientsLoading, addClient, updateClient, archiveClient } = useClients();
@@ -32,7 +33,19 @@ function AppContent() {
   const [editingClient, setEditingClient] = useState<Client | undefined>(undefined);
   const [activePage, setActivePage] = useState<'dashboard' | 'clients' | 'charts'>('dashboard');
   const [editingService, setEditingService] = useState<Service | undefined>(undefined);
+  const [demoMode, setDemoMode] = useState(false);
+  const [demoServices, setDemoServices] = useState<Service[]>([]);
   const currencySymbol = language === 'pt' ? '€' : '$';
+
+  // Initialize demo services
+  useEffect(() => {
+    setDemoServices(generateDemoServices());
+  }, []);
+
+  // Use demo data when in demo mode
+  const displayClients = demoMode ? demoClients : clients;
+  const displayServices = demoMode ? demoServices : services;
+  const displayLoading = demoMode ? false : (servicesLoading || clientsLoading);
 
   useEffect(() => {
     if (user) {
@@ -113,6 +126,19 @@ function AppContent() {
           <h1 style={{ fontSize: '1.85rem', color: '#2F4F4F', letterSpacing: '-0.02em' }}>Domestik</h1>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem' }}>
             {t('app.welcomePrefix')} <strong>{user.email?.split('@')[0]}</strong>!
+            {demoMode && (
+              <span style={{
+                marginLeft: '8px',
+                padding: '2px 8px',
+                background: '#F59E0B',
+                color: 'white',
+                borderRadius: '4px',
+                fontSize: '0.75rem',
+                fontWeight: 600
+              }}>
+                DEMO
+              </span>
+            )}
           </p>
         </div>
         <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
@@ -135,6 +161,27 @@ function AppContent() {
             aria-label={language === 'pt' ? 'Mudar para inglês' : 'Switch to Portuguese'}
           >
             {language === 'pt' ? 'EN' : 'PT'}
+          </button>
+          <button
+            onClick={() => setDemoMode(!demoMode)}
+            style={{
+              background: demoMode ? '#F59E0B' : 'var(--white)',
+              border: '1px solid #E5E7EB',
+              color: demoMode ? 'white' : 'var(--text-main)',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '0.9rem',
+              fontWeight: 500,
+              padding: '10px 16px',
+              borderRadius: '12px',
+              boxShadow: 'var(--shadow-soft)'
+            }}
+            title={demoMode ? 'Sair do modo demo' : 'Ativar modo demo'}
+          >
+            {demoMode ? <Square size={18} /> : <Play size={18} />}
+            <span style={{ marginLeft: '6px' }}>Demo</span>
           </button>
           <button
             onClick={() => signOut()}
@@ -239,7 +286,7 @@ function AppContent() {
 
       {activePage === 'dashboard' && (
         <>
-          {servicesLoading ? <DashboardSkeleton /> : <Dashboard services={services} />}
+          {displayLoading ? <DashboardSkeleton /> : <Dashboard services={displayServices} />}
 
           {!isAdmin && (
         <div className="card" style={{ marginBottom: '24px', background: '#F0F9FF', border: '1px solid #BAE6FD', display: 'flex', gap: '12px', alignItems: 'center' }}>
@@ -279,11 +326,11 @@ function AppContent() {
           )}
 
           <ServiceHistory
-            services={services}
-            clients={clients}
+            services={displayServices}
+            clients={displayClients}
             onDelete={handleDeleteService}
             onEdit={handleEditService}
-            onAdd={isAdmin ? () => setIsServiceModalOpen(true) : undefined}
+            onAdd={isAdmin && !demoMode ? () => setIsServiceModalOpen(true) : undefined}
             selectedDate={selectedDate}
           />
         </>
@@ -296,6 +343,7 @@ function AppContent() {
               <h2 style={{ fontSize: '1.1rem' }}>{t('clients.title')}</h2>
               <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{t('clients.subtitle')}</p>
             </div>
+            {!demoMode && (
             <button
               onClick={handleOpenNewClient}
               style={{
@@ -310,13 +358,14 @@ function AppContent() {
             >
               {t('clients.addButton')}
             </button>
+            )}
           </div>
-          {clientsLoading ? (
+          {displayLoading ? (
             <CardSkeleton count={5} />
           ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {clients.map((client) => {
-              const stats = services.reduce(
+            {displayClients.map((client) => {
+              const stats = displayServices.reduce(
                 (acc, s) => s.client_id === client.id
                   ? {
                       total: acc.total + s.total,
@@ -348,24 +397,26 @@ function AppContent() {
                       </span>
                     </div>
                   </div>
-                  <div style={{ display: 'flex', gap: '6px' }}>
-                    <button
-                      onClick={() => handleEditClient(client)}
-                      style={{ padding: '6px 10px', fontSize: '0.8rem', borderRadius: '999px', border: '1px solid #E5E7EB', background: 'var(--white)', cursor: 'pointer' }}
-                    >
-                      {t('clients.editButton')}
-                    </button>
-                    <button
-                      onClick={() => handleArchiveClient(client)}
-                      style={{ padding: '6px 10px', fontSize: '0.8rem', borderRadius: '999px', border: '1px solid #FCA5A5', background: '#FEF2F2', color: '#B91C1C', cursor: 'pointer' }}
-                    >
-                      {t('clients.archiveButton')}
-                    </button>
-                  </div>
+                  {!demoMode && (
+                    <div style={{ display: 'flex', gap: '6px' }}>
+                      <button
+                        onClick={() => handleEditClient(client)}
+                        style={{ padding: '6px 10px', fontSize: '0.8rem', borderRadius: '999px', border: '1px solid #E5E7EB', background: 'var(--white)', cursor: 'pointer' }}
+                      >
+                        {t('clients.editButton')}
+                      </button>
+                      <button
+                        onClick={() => handleArchiveClient(client)}
+                        style={{ padding: '6px 10px', fontSize: '0.8rem', borderRadius: '999px', border: '1px solid #FCA5A5', background: '#FEF2F2', color: '#B91C1C', cursor: 'pointer' }}
+                      >
+                        {t('clients.archiveButton')}
+                      </button>
+                    </div>
+                  )}
                 </div>
               );
             })}
-            {clients.length === 0 && (
+            {displayClients.length === 0 && (
               <div style={{ textAlign: 'center', padding: '24px 0', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
                 {t('clients.empty')}
               </div>
@@ -377,7 +428,7 @@ function AppContent() {
 
       {activePage === 'charts' && (
         <div style={{ marginBottom: '24px' }}>
-          {servicesLoading ? <DashboardSkeleton /> : <DashboardAdvanced services={services} />}
+          {displayLoading ? <DashboardSkeleton /> : <DashboardAdvanced services={displayServices} />}
         </div>
       )}
 
