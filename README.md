@@ -169,7 +169,7 @@ This project is licensed under the MIT License.
 
 ## Support
 
-For support, email support@iteriotech.com or open an issue on GitHub.
+For support, email iteriotech@gmail.com or open an issue on GitHub.
 
 ---
 
