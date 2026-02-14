@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { supabase } from '../lib/supabase';
-import { LogIn, Lock, Mail, Loader2, Home, UserPlus } from 'lucide-react';
+import { LogIn, Lock, Mail, Loader2, UserPlus } from 'lucide-react';
 import { useI18n } from '../i18n';
 
 export function Login() {
@@ -54,23 +54,16 @@ export function Login() {
                 boxShadow: 'var(--shadow-lg)'
             }}>
                 <div style={{ textAlign: 'center' }}>
-                    <div style={{
-                        width: '72px',
-                        height: '72px',
-                        background: mode === 'login' ? 'var(--primary-emerald)' : 'var(--primary-indigo)',
-                        borderRadius: '20px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        margin: '0 auto 20px',
-                        color: 'white',
-                        boxShadow: mode === 'login'
-                            ? '0 12px 24px rgba(16, 185, 129, 0.25)'
-                            : '0 12px 24px rgba(99, 102, 241, 0.25)',
-                        transition: 'all 0.3s ease'
-                    }}>
-                        <Home size={36} />
-                    </div>
+                    <img 
+                        src="/logo.png" 
+                        alt="Domestik Logo" 
+                        style={{
+                            width: '120px',
+                            height: 'auto',
+                            margin: '0 auto 20px',
+                            display: 'block'
+                        }}
+                    />
                     <h1 style={{ fontSize: '1.75rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '8px' }}>
                         {mode === 'login' ? t('login.title') : t('signup.title')}
                     </h1>
