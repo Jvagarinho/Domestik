@@ -64,6 +64,15 @@ function AppContent() {
     }
   }, [user, activePage, selectedDate]);
 
+  // Refetch monthly services when returning to dashboard
+  useEffect(() => {
+    if (user && activePage === 'dashboard' && !demoMode) {
+      const start = format(startOfMonth(selectedDate), 'yyyy-MM-dd');
+      const end = format(endOfMonth(selectedDate), 'yyyy-MM-dd');
+      fetchServices(undefined, start, end);
+    }
+  }, [user, activePage, demoMode]);
+
   const handleEditService = (service: Service) => {
     setEditingService(service);
     setIsServiceModalOpen(true);

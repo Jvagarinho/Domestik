@@ -58,7 +58,7 @@ export function Login() {
                         src="/logo.png" 
                         alt="Domestik Logo" 
                         style={{
-                            width: '120px',
+                            width: '100px',
                             height: 'auto',
                             margin: '0 auto 20px',
                             display: 'block'
